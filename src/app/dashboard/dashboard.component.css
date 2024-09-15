@@ -1,0 +1,65 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+}
+
+.dashboard {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 items per row */
+  grid-gap: 20px; /* Spacing between items */
+  padding: 20px;
+  margin-top: 100px;
+}
+
+.dashboard-item {
+  text-align: center;
+}
+
+.icon {
+  width: 120px; /* Adjust for bigger button appearance */
+  height: 120px;
+  border-radius: 50%;
+  background-color: white; /* White background to make images look like buttons */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add slight shadow to give button effect */
+}
+
+.icon img {
+  width: 100%; /* Make image fit the circle */
+  height: 100%;
+  object-fit: cover; /* Cover ensures the image keeps its aspect ratio */
+  border-radius: 50%; /* Make the image round */
+}
+
+.dashboard-item p {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #333;
+}
+
+@media (max-width: 768px) {
+  .dashboard {
+    grid-template-columns: repeat(
+      2,
+      1fr
+    ); /* 2 items per row on smaller screens */
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard {
+    grid-template-columns: repeat(
+      1,
+      1fr
+    ); /* 1 item per row on very small screens */
+  }
+}

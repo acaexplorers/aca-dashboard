@@ -4,21 +4,29 @@ import { BrowserModule  } from '@angular/platform-browser';
 import { Routes, RouterModule } from '@angular/router';
 
 import { AdminLayoutComponent } from './layouts/admin-layout/admin-layout.component';
+import { LoginComponent } from './login/login.component';
 
-const routes: Routes =[
+const routes: Routes = [
   {
-    path: '',
-    redirectTo: 'dashboard',
-    pathMatch: 'full',
-  }, {
-    path: '',
-    component: AdminLayoutComponent,
-    children: [{
-      path: '',
-      loadChildren: () => import('./layouts/admin-layout/admin-layout.module').then(m => m.AdminLayoutModule)
-    }]
+    path: 'login',  // Define the login route
+    component: LoginComponent
+  },
+  {
+    path: '',  // Root path
+    component: AdminLayoutComponent,  // Dashboard routes will be under this layout
+    children: [
+      {
+        path: '',  // This will be the default route for AdminLayoutComponent
+        loadChildren: () => import('./layouts/admin-layout/admin-layout.module').then(m => m.AdminLayoutModule)
+      }
+    ]
+  },
+  {
+    path: '**',  // Wildcard route for 404 (not found)
+    redirectTo: 'login',  // Redirect unknown routes to the login page
   }
 ];
+
 
 @NgModule({
   imports: [

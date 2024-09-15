@@ -1,0 +1,192 @@
+<div class="main-content">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-md-12">
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>Clan Council Meeting Minutes</mat-card-title>
+              <mat-card-subtitle>Fill out the form to record meeting minutes</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <form [formGroup]="councilForm" (ngSubmit)="onSubmit()">
+                <!-- Call to Order Section -->
+                <table class="table table-bordered">
+                  <tr>
+                    <td width="30%"><strong>Call to Order</strong></td>
+                    <td width="70%" class="text-left">
+                      A meeting of 
+                      <mat-form-field>
+                        <input matInput formControlName="meeting_title" placeholder="Meeting Title" required>
+                      </mat-form-field>
+                      was held at 
+                      <mat-form-field>
+                        <input matInput [matDatepicker]="picker" formControlName="meeting_date" placeholder="Meeting Date" required>
+                        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                        <mat-datepicker #picker></mat-datepicker>
+                      </mat-form-field>
+                      at 
+                      <mat-form-field>
+                        <input matInput formControlName="meeting_start_time" placeholder="Start Time">
+                      </mat-form-field>
+                    </td>
+                  </tr>
+  
+                  <!-- Attendees Section -->
+                  <tr>
+                    <td width="30%"><strong>Attendees</strong></td>
+                    <td width="70%" class="text-left">
+                      <table width="100%">
+                        <tr>
+                          <td>
+                            President
+                            <mat-form-field>
+                              <input matInput formControlName="president" placeholder="President">
+                            </mat-form-field>
+                          </td>
+                          <td>
+                            Librarian
+                            <mat-form-field>
+                              <input matInput formControlName="librarian" placeholder="Librarian">
+                            </mat-form-field>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
+                            Secretary
+                            <mat-form-field>
+                              <input matInput formControlName="secretary" placeholder="Secretary">
+                            </mat-form-field>
+                          </td>
+                          <td>
+                            Tracker
+                            <mat-form-field>
+                              <input matInput formControlName="tracker" placeholder="Tracker">
+                            </mat-form-field>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
+                            Treasurer
+                            <mat-form-field>
+                              <input matInput formControlName="treasurer" placeholder="Treasurer">
+                            </mat-form-field>
+                          </td>
+                          <td>
+                            Member(s)
+                            <mat-form-field>
+                              <input matInput formControlName="members" placeholder="Members">
+                            </mat-form-field>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
+                            Advisor(s)
+                            <mat-form-field>
+                              <input matInput formControlName="advisors" placeholder="Advisors">
+                            </mat-form-field>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+  
+                  <!-- Review Minutes Section -->
+                  <tr>
+                    <td width="30%"><strong>Review Minutes</strong></td>
+                    <td width="70%" class="text-left">
+                      The minutes were reviewed and approved by
+                      <mat-form-field>
+                        <input matInput formControlName="minute_reviewer" placeholder="Minute Reviewer">
+                      </mat-form-field>
+                    </td>
+                  </tr>
+  
+                  <!-- Reports Section -->
+                  <tr>
+                    <td width="30%"><strong>Reports</strong></td>
+                    <td width="70%" class="text-left">
+                      <mat-form-field>
+                        <textarea matInput formControlName="reports" rows="4" placeholder="Reports"></textarea>
+                      </mat-form-field>
+                    </td>
+                  </tr>
+  
+                  <!-- Unfinished Business Section -->
+                  <tr>
+                    <td width="30%"><strong>Unfinished Business</strong></td>
+                    <td width="70%" class="text-left">
+                      <mat-form-field>
+                        <textarea matInput formControlName="u_b" rows="4" placeholder="Unfinished Business"></textarea>
+                      </mat-form-field>
+                    </td>
+                  </tr>
+  
+                  <!-- New Business Section -->
+                  <tr>
+                    <td width="30%"><strong>New Business</strong></td>
+                    <td width="70%" class="text-left">
+                      <mat-form-field>
+                        <textarea matInput formControlName="n_b" rows="4" placeholder="New Business"></textarea>
+                      </mat-form-field>
+                    </td>
+                  </tr>
+  
+                  <!-- Announcements Section -->
+                  <tr>
+                    <td width="30%"><strong>Announcements / Assessments</strong></td>
+                    <td width="70%" class="text-left">
+                      <mat-form-field>
+                        <textarea matInput formControlName="announcements" rows="4" placeholder="Announcements"></textarea>
+                      </mat-form-field>
+                    </td>
+                  </tr>
+  
+                  <!-- Adjournment Section -->
+                  <tr>
+                    <td width="30%"><strong>Adjournment</strong></td>
+                    <td width="70%" class="text-left">
+                      The meeting of
+                      <mat-form-field>
+                        <input matInput formControlName="meeting_title1" placeholder="Meeting Title" value="English Warriors of Colombia">
+                      </mat-form-field>
+                      was adjourned at 
+                      <mat-form-field>
+                        <input matInput formControlName="meeting_end_time" placeholder="Adjournment Time">
+                      </mat-form-field>
+                    </td>
+                  </tr>
+  
+                  <!-- Signatures Section -->
+                  <tr>
+                    <td width="30%" class="text-left">
+                      <mat-form-field class="example-full-width">
+                        <mat-label>ACA Explorers Chair Signature</mat-label>
+                        <input matInput formControlName="chair_sign" placeholder="Chair Signature">
+                      </mat-form-field>
+                      <canvas id="chairSignature" class="signature-canvas" #canvas1></canvas>
+                      <button mat-raised-button color="primary" (click)="clearCanvas('chairSignature')">Clear Signature</button>
+                      <hr>
+                      <h6 class="font-weight-bold">ACA Explorers Chair</h6><br>Print/Signature
+                    </td>
+                    <td width="70%" class="text-left">
+                      <mat-form-field class="example-full-width">
+                        <mat-label>ACA Explorers Secretary Signature</mat-label>
+                        <input matInput formControlName="secre_sign" placeholder="Secretary Signature">
+                      </mat-form-field>
+                      <canvas id="secretarySignature" class="signature-canvas" #canvas2></canvas>
+                      <br/>
+                      <button mat-raised-button color="primary" (click)="clearCanvas('secretarySignature')">Clear Signature</button>
+                      <hr>
+                      <h6 class="font-weight-bold">ACA Explorers Secretary</h6><br>Print/Signature
+                    </td>
+                  </tr>
+                </table>
+  
+                <button mat-raised-button color="primary" type="submit">Submit</button>
+              </form>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+    </div>
+  </div>

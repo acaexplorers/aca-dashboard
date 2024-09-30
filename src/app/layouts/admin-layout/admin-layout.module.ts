@@ -10,6 +10,10 @@ import { TypographyComponent } from '../../typography/typography.component';
 
 //Real routes
 import { ClanCouncilFormComponent } from '../../clan-council-form/clan-council-form.component';
+import { RunaFormComponent } from '../../runa-form/runa-form.component';
+
+//Sub components
+import { QuestionnaireComponent } from '../../questionnaire/questionnaire.component';
 
 import { IconsComponent } from '../../icons/icons.component';
 import { MapsComponent } from '../../maps/maps.component';
@@ -58,7 +62,10 @@ import { MatIconModule } from '@angular/material/icon';
     UpgradeComponent,
 
     // Real routes
-    ClanCouncilFormComponent
+    ClanCouncilFormComponent,
+    RunaFormComponent,
+    QuestionnaireComponent
+
   ]
 })
 

@@ -1,0 +1,40 @@
+<div class="question-container">
+  <!-- Display current question -->
+  <div *ngIf="currentQuestionIndex < questions.length" class="question-content">
+    <p class="question-text">{{ questions[currentQuestionIndex] }}</p>
+    <mat-form-field class="answer-input">
+      <input
+        matInput
+        [(ngModel)]="answers[currentQuestionIndex]"
+        placeholder="Your answer"
+      />
+    </mat-form-field>
+    <div class="navigation-buttons">
+      <button
+        mat-button
+        (click)="previousQuestion()"
+        [disabled]="currentQuestionIndex === 0"
+      >
+        Previous
+      </button>
+      <button
+        mat-button
+        (click)="nextQuestion()"
+        [disabled]="currentQuestionIndex === questions.length - 1"
+      >
+        Next
+      </button>
+    </div>
+  </div>
+
+  <!-- Completion message -->
+  <div
+    *ngIf="currentQuestionIndex === questions.length"
+    class="completion-message"
+  >
+    <h3>All questions answered!</h3>
+    <button mat-raised-button color="primary" (click)="submitAnswers()">
+      Submit Answers
+    </button>
+  </div>
+</div>

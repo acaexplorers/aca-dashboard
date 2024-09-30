@@ -1,0 +1,74 @@
+<div class="container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title class="text-center">RUNA Form</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="runaForm" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <mat-form-field>
+            <mat-label>Select Week</mat-label>
+            <mat-select formControlName="week">
+              <mat-option *ngFor="let week of weeks" [value]="week">{{
+                week
+              }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="section-header">Reports</div>
+
+        <app-questionnaire
+          [questions]="questions"
+          (answersEvent)="handleAnswers($event)"
+        >
+        </app-questionnaire>
+
+        <div class="section-header">Unfinished Business</div>
+        <mat-form-field class="full-width">
+          <textarea
+            matInput
+            formControlName="unfinishedBusiness"
+            placeholder="Describe Unfinished Business"
+            rows="4"
+          ></textarea>
+        </mat-form-field>
+
+        <div class="section-header">New Business</div>
+        <mat-form-field class="full-width">
+          <textarea
+            matInput
+            formControlName="newBusiness"
+            placeholder="New Business"
+            rows="4"
+          ></textarea>
+        </mat-form-field>
+
+        <div class="section-header">Announcements</div>
+        <mat-form-field class="full-width">
+          <textarea
+            matInput
+            formControlName="announcements"
+            placeholder="Announcements"
+            rows="4"
+          ></textarea>
+        </mat-form-field>
+
+        <div class="section-header">Signature</div>
+        <div class="form-group">
+          <canvas id="canvas" class="signature-canvas" #canvas></canvas>
+          <button mat-raised-button color="primary" (click)="clearSignature()">
+            Clear Signature
+          </button>
+        </div>
+
+        <div class="text-center">
+          <button mat-raised-button color="primary" type="submit">
+            Submit
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

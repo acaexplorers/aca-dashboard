@@ -20,10 +20,9 @@
         <div class="section-header">Reports</div>
 
         <app-questionnaire
-          [questions]="questions"
-          (answersEvent)="handleAnswers($event)"
-        >
-        </app-questionnaire>
+          [questions]="reportsQuestions"
+          (answersEvent)="handleReportsAnswers($event)"
+        ></app-questionnaire>
 
         <div class="section-header">Unfinished Business</div>
         <mat-form-field class="full-width">
@@ -46,14 +45,10 @@
         </mat-form-field>
 
         <div class="section-header">Announcements</div>
-        <mat-form-field class="full-width">
-          <textarea
-            matInput
-            formControlName="announcements"
-            placeholder="Announcements"
-            rows="4"
-          ></textarea>
-        </mat-form-field>
+        <app-questionnaire
+          [questions]="announcementsQuestions"
+          (answersEvent)="handleAnnouncementsAnswers($event)"
+        ></app-questionnaire>
 
         <div class="section-header">Signature</div>
         <div class="form-group">

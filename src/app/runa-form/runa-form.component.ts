@@ -20,30 +20,26 @@ export class RunaFormComponent implements OnInit {
 
   constructor(private fb: FormBuilder, private canvasService: CanvasService) {} // Inject the CanvasService
 
-  questions: string[] = [
+  reportsQuestions: string[] = [
     "What is your current level and band in the ACA program?",
     "How many points did you earn this week?",
     "How much Explorers Gold (ExG) did you contribute this week?",
-    "How many Braindumps did you contribute? (e.g., Audios, Translations, Forum Posts)",
     "In what ways did you contribute to current and future Explorers through your ACA project?",
     "What idea do you have to improve your ACA project this week?",
-    "How many days did you post this week? (out of 7)",
-    "What is your current Explorers Gold balance?",
-    "What is your Black Band streak out of 100 days?",
-    "What is your Blue Band streak out of 100 days?",
-    "Are you currently in Club 100 this week?",
-    "What is your added streak in days?",
-    "What is your average study rate in cards per day?",
-    "How many new cards did you add to your study deck last week?",
     "Which Habit Action do you most need to improve from your Habit Tracker?",
-    "Which statistic do you most need to improve?",
     "Which statistic are you most proud of?",
-    "Which Habit Action are you most proud of from your Habit Tracker?",
     "What is your i+1 moment for this week?",
-    "How will you celebrate your success this week?",
   ];
 
-  answers: string[] = [];
+  announcementsQuestions: string[] = [
+    "What is your Habit Action for this week?",
+    "How will you celebrate your success this week?",
+    "What is your i+1 Moment for this week?",
+    "How did you perform in your previous Habit Action?",
+  ];
+
+  reportsAnswers: string[] = [];
+  announcementsAnswers: string[] = [];
 
   ngOnInit(): void {
     // Initialize the form with the necessary controls
@@ -77,9 +73,12 @@ export class RunaFormComponent implements OnInit {
     this.canvasService.clearCanvas(this.canvas.nativeElement);
   }
 
-  handleAnswers(answers: string[]): void {
-    this.answers = answers; // Get the answers from the questionnaire
-    console.log("Received answers:", this.answers);
+  handleReportsAnswers(answers: string[]): void {
+    this.reportsAnswers = answers;
+  }
+
+  handleAnnouncementsAnswers(answers: string[]): void {
+    this.announcementsAnswers = answers;
   }
 
   onSubmit(): void {

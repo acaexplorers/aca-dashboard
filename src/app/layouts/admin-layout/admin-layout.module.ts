@@ -11,6 +11,8 @@ import { TypographyComponent } from '../../typography/typography.component';
 //Real routes
 import { ClanCouncilFormComponent } from '../../clan-council-form/clan-council-form.component';
 import { RunaFormComponent } from '../../runa-form/runa-form.component';
+import { RegisterActivityComponent } from '../../register-activity/register-activity.component';
+import { StatsComponent } from '../../stats/stats.component';
 
 //Sub components
 import { QuestionnaireComponent } from '../../questionnaire/questionnaire.component';
@@ -29,7 +31,14 @@ import {MatSelectModule} from '@angular/material/select';
 import { MatCardModule } from '@angular/material/card';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
-import { MatIconModule } from '@angular/material/icon';
+
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDialogModule } from "@angular/material/dialog";
+
+import { MatTableModule } from '@angular/material/table';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatExpansionModule } from '@angular/material/expansion';
+
 
 
 @NgModule({
@@ -49,7 +58,12 @@ import { MatIconModule } from '@angular/material/icon';
     MatCardModule,
     MatDatepickerModule,
     MatNativeDateModule,
-    MatIconModule
+    MatSnackBarModule,
+    MatDialogModule,
+
+    MatTableModule,
+    MatButtonToggleModule,
+    MatExpansionModule
   ],
   declarations: [
     DashboardComponent,
@@ -64,8 +78,9 @@ import { MatIconModule } from '@angular/material/icon';
     // Real routes
     ClanCouncilFormComponent,
     RunaFormComponent,
-    QuestionnaireComponent
-
+    QuestionnaireComponent,
+    RegisterActivityComponent,
+    StatsComponent
   ]
 })
 

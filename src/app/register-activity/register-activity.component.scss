@@ -1,0 +1,139 @@
+// Container for the entire page
+.container-body-home {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; // Ensures it takes up the full screen height
+  background-color: #1886c8;
+}
+
+// Container for the reports
+.container-reports {
+  background-color: #ffffff;
+  border-radius: 10px;
+  padding: 20px;
+  width: 400px;
+  text-align: center;
+}
+
+// Title styling
+.report-title {
+  background-color: white;
+  width: 100%;
+  text-align: center;
+  padding: 10px 0;
+  margin-bottom: 20px;
+  color: #1886c8;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+// Days menu styles
+.days-menu {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.day {
+  background-color: #ff2c01;
+  color: white;
+  padding: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  width: 14.2%;
+  text-align: center;
+  font-weight: bold;
+  font-size: 18px;
+  border-radius: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.day:hover {
+  background-color: #e02201;
+}
+
+.divider {
+  height: 20px;
+  width: 1px;
+  background-color: white;
+  margin: 0 5px;
+}
+
+.info-section {
+  background-color: white;
+  color: black;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.info-section h2 {
+  margin: 0;
+  padding-bottom: 12px;
+  font-size: 22px;
+  font-weight: bold;
+  color: #1886c8;
+}
+
+.info-section .large {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+.card {
+  padding: 15px;
+  border-radius: 0 0 10px 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  width: 100%; /* Ensure it takes full available width */
+  max-width: 400px; /* Optional: limit the card to a specific width */
+  margin: 0 auto; /* Center the card */
+}
+
+.large-input {
+  height: 50px !important;
+  width: 100% !important; /* Make the input take up full available width within container */
+  font-size: 18px;
+  padding: 10px;
+  background-color: #f2f2f2;
+  border: none;
+  border-radius: 5px;
+  box-sizing: border-box; /* Ensure padding and width are calculated properly */
+}
+
+// Button container
+.button-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.button {
+  background-color: #ffffff;
+  color: #34aadc;
+  padding: 10px 20px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.button.card {
+  width: 100%;
+  padding: 15px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.button.card.submit {
+  background-color: #6bbb2c;
+  color: white;
+}
+
+.button.card.submit:hover {
+  background-color: #5ca624;
+}

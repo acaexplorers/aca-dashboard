@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import * as Chartist from 'chartist';
 
 @Component({
   selector: 'app-dashboard',
@@ -8,143 +7,40 @@ import * as Chartist from 'chartist';
 })
 export class DashboardComponent implements OnInit {
 
+  dashboardItems = [
+    { iconSrc: 'https://www.acaexplorers.com/explorers/img/clan.png', altText: 'Clan Dashboard', label: 'Clan Dashboard', show: true },
+    { iconSrc: 'https://www.acaexplorers.com/explorers/img/braindump_icon.png', altText: 'Brain Dump', label: 'Brain Dump', show: false },
+    { iconSrc: 'https://www.acaexplorers.com/explorers/img/message.png', altText: 'ACA Explorer Chat', label: 'ACA Explorer Chat', show: false },
+    { iconSrc: 'https://www.acaexplorers.com/explorers/img/profile.png', altText: 'Explorer Profile', label: 'Explorer Profile', show: false },
+    { iconSrc: 'https://www.acaexplorers.com/explorers/img/mastery.png', altText: 'Mastery', label: 'Mastery', show: false },
+    { iconSrc: 'https://www.acaexplorers.com/explorers/img/audio_board.png', altText: 'Audio Upload - Subir', label: 'Audio Upload - Subir', show: false },
+    { iconSrc: 'https://www.acaexplorers.com/explorers/img/audio_record.png', altText: 'Audio Record - Grabar', label: 'Audio Record - Grabar', show: false },
+    { iconSrc: 'https://www.acaexplorers.com/explorers/img/searchword.png', altText: 'SearchWord', label: 'SearchWord', show: false },
+    { iconSrc: 'https://www.acaexplorers.com/explorers/img/teamwork.png', altText: 'Study Report', label: 'Study Report', show: true },
+    { iconSrc: 'https://www.acaexplorers.com/explorers/img/gsuite.png', altText: 'G-Suite', label: 'G-Suite', show: false },
+    { iconSrc: 'https://www.acaexplorers.com/explorers/img/wiki.png', altText: 'ACA Wiki', label: 'ACA Wiki', show: false },
+    { iconSrc: 'https://www.acaexplorers.com/explorers/img/aca_ipa.png', altText: 'ACA IPA - beta', label: 'ACA IPA - beta', show: false },
+    { iconSrc: 'https://www.acaexplorers.com/explorers/img/forum.png', altText: 'ACA FORUM', label: 'ACA FORUM', show: false },
+    { iconSrc: 'https://www.acaexplorers.com/explorers/img/3LayersofChange.png', altText: '3 Layers of Change', label: '3 Layers of Change<br />3 Capas de Cambio', show: false }
+  ];
+
+  visibleDashboardItems: any[][] = [];
+
   constructor() { }
-  startAnimationForLineChart(chart){
-      let seq: any, delays: any, durations: any;
-      seq = 0;
-      delays = 80;
-      durations = 500;
 
-      chart.on('draw', function(data) {
-        if(data.type === 'line' || data.type === 'area') {
-          data.element.animate({
-            d: {
-              begin: 600,
-              dur: 700,
-              from: data.path.clone().scale(1, 0).translate(0, data.chartRect.height()).stringify(),
-              to: data.path.clone().stringify(),
-              easing: Chartist.Svg.Easing.easeOutQuint
-            }
-          });
-        } else if(data.type === 'point') {
-              seq++;
-              data.element.animate({
-                opacity: {
-                  begin: seq * delays,
-                  dur: durations,
-                  from: 0,
-                  to: 1,
-                  easing: 'ease'
-                }
-              });
-          }
-      });
-
-      seq = 0;
-  };
-  startAnimationForBarChart(chart){
-      let seq2: any, delays2: any, durations2: any;
-
-      seq2 = 0;
-      delays2 = 80;
-      durations2 = 500;
-      chart.on('draw', function(data) {
-        if(data.type === 'bar'){
-            seq2++;
-            data.element.animate({
-              opacity: {
-                begin: seq2 * delays2,
-                dur: durations2,
-                from: 0,
-                to: 1,
-                easing: 'ease'
-              }
-            });
-        }
-      });
-
-      seq2 = 0;
-  };
   ngOnInit() {
-      /* ----------==========     Daily Sales Chart initialization For Documentation    ==========---------- */
-
-      const dataDailySalesChart: any = {
-          labels: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
-          series: [
-              [12, 17, 7, 17, 23, 18, 38]
-          ]
-      };
-
-     const optionsDailySalesChart: any = {
-          lineSmooth: Chartist.Interpolation.cardinal({
-              tension: 0
-          }),
-          low: 0,
-          high: 50, // creative tim: we recommend you to set the high sa the biggest value + something for a better look
-          chartPadding: { top: 0, right: 0, bottom: 0, left: 0},
-      }
-
-      var dailySalesChart = new Chartist.Line('#dailySalesChart', dataDailySalesChart, optionsDailySalesChart);
-
-      this.startAnimationForLineChart(dailySalesChart);
-
-
-      /* ----------==========     Completed Tasks Chart initialization    ==========---------- */
-
-      const dataCompletedTasksChart: any = {
-          labels: ['12p', '3p', '6p', '9p', '12p', '3a', '6a', '9a'],
-          series: [
-              [230, 750, 450, 300, 280, 240, 200, 190]
-          ]
-      };
-
-     const optionsCompletedTasksChart: any = {
-          lineSmooth: Chartist.Interpolation.cardinal({
-              tension: 0
-          }),
-          low: 0,
-          high: 1000, // creative tim: we recommend you to set the high sa the biggest value + something for a better look
-          chartPadding: { top: 0, right: 0, bottom: 0, left: 0}
-      }
-
-      var completedTasksChart = new Chartist.Line('#completedTasksChart', dataCompletedTasksChart, optionsCompletedTasksChart);
-
-      // start animation for the Completed Tasks Chart - Line Chart
-      this.startAnimationForLineChart(completedTasksChart);
-
-
-
-      /* ----------==========     Emails Subscription Chart initialization    ==========---------- */
-
-      var datawebsiteViewsChart = {
-        labels: ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'],
-        series: [
-          [542, 443, 320, 780, 553, 453, 326, 434, 568, 610, 756, 895]
-
-        ]
-      };
-      var optionswebsiteViewsChart = {
-          axisX: {
-              showGrid: false
-          },
-          low: 0,
-          high: 1000,
-          chartPadding: { top: 0, right: 5, bottom: 0, left: 0}
-      };
-      var responsiveOptions: any[] = [
-        ['screen and (max-width: 640px)', {
-          seriesBarDistance: 5,
-          axisX: {
-            labelInterpolationFnc: function (value) {
-              return value[0];
-            }
-          }
-        }]
-      ];
-      var websiteViewsChart = new Chartist.Bar('#websiteViewsChart', datawebsiteViewsChart, optionswebsiteViewsChart, responsiveOptions);
-
-      //start animation for the Emails Subscription Chart
-      this.startAnimationForBarChart(websiteViewsChart);
+    this.filterAndGroupItems();
   }
 
+  filterAndGroupItems() {
+    const filteredItems = this.dashboardItems.filter(item => item.show);
+    console.log(filteredItems);
+    this.visibleDashboardItems = [];
+
+    for (let i = 0; i < filteredItems.length; i += 4) {
+      this.visibleDashboardItems.push(filteredItems.slice(i, i + 4));
+    }
+
+    console.log(this.visibleDashboardItems);
+  }
 }

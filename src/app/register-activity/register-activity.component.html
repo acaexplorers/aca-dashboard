@@ -1,0 +1,40 @@
+<div class="container-body-home">
+  <div class="container-reports mat-elevation-z8">
+    <h1 class="report-title">Daily ACA Report</h1>
+
+    <div class="days-menu">
+      <div
+        *ngFor="let day of daysReference.spanish; let i = index"
+        class="day"
+        [style.background]="selectedIndex === i ? '#1886c8' : '#ff2c01'"
+        (click)="selectedIndex = i"
+      >
+        {{ day[0] }}
+        <div class="divider"></div>
+        {{ daysReference.english[i][0] }}
+      </div>
+    </div>
+
+    <mat-card class="card">
+      <div class="info-section">
+        <h2>{{ daysReference.spanish[selectedIndex] }} | {{ daysReference.english[selectedIndex] }}</h2>
+        <span class="large">{{ currentDate }}</span>
+        <br />
+        <p>Studied (Estudiado)</p>
+        <mat-form-field appearance="outline" class="example-full-width">
+          <input matInput type="number" [formControl]="studied" class="large-input" />
+        </mat-form-field>
+        <p>Added (Agregado)</p>
+        <mat-form-field appearance="outline" class="example-full-width">
+          <input matInput type="number" [formControl]="added" class="large-input" />
+        </mat-form-field>
+      </div>
+    </mat-card>    
+
+    <div class="button-container">
+      <button mat-raised-button color="primary" class="button card submit" (click)="submitReport()">
+        SUBMIT | SUBIR
+      </button>
+    </div>
+  </div>
+</div>

@@ -8,6 +8,7 @@ import { ComponentsModule } from './components/components.module';
 import { AppComponent } from './app.component';
 import { AdminLayoutComponent } from './layouts/admin-layout/admin-layout.component';
 import { LoginComponent } from './login/login.component';
+import { MatIconModule } from '@angular/material/icon';
 
 
 @NgModule({
@@ -19,11 +20,12 @@ import { LoginComponent } from './login/login.component';
     ComponentsModule,
     RouterModule,
     AppRoutingModule,
+    MatIconModule
   ],
   declarations: [
     AppComponent,
     AdminLayoutComponent,
-    LoginComponent,
+    LoginComponent
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -8,15 +8,20 @@ import { LoginComponent } from './login/login.component';
 
 const routes: Routes = [
   {
-    path: 'login',  // Define the login route
+    path: 'login',
     component: LoginComponent
   },
   {
     path: '',  // Root path
-    component: AdminLayoutComponent,  // Dashboard routes will be under this layout
+    component: AdminLayoutComponent,
     children: [
       {
-        path: '',  // This will be the default route for AdminLayoutComponent
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full',
+      },
+      {
+        path: '',
         loadChildren: () => import('./layouts/admin-layout/admin-layout.module').then(m => m.AdminLayoutModule)
       }
     ]

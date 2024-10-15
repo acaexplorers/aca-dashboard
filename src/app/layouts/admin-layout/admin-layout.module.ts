@@ -13,6 +13,7 @@ import { ClanCouncilFormComponent } from '../../clan-council-form/clan-council-f
 import { RunaFormComponent } from '../../runa-form/runa-form.component';
 import { RegisterActivityComponent } from '../../register-activity/register-activity.component';
 import { StatsComponent } from '../../stats/stats.component';
+import { PointsComponent } from '../../points/points.component';
 
 //Sub components
 import { QuestionnaireComponent } from '../../questionnaire/questionnaire.component';
@@ -80,7 +81,8 @@ import { MatExpansionModule } from '@angular/material/expansion';
     RunaFormComponent,
     QuestionnaireComponent,
     RegisterActivityComponent,
-    StatsComponent
+    StatsComponent,
+    PointsComponent
   ]
 })
 

@@ -1,12 +1,12 @@
 import { Routes } from "@angular/router";
 
-import { DashboardComponent } from "../../dashboard/dashboard.component";
-import { UserProfileComponent } from "../../user-profile/user-profile.component";
-import { ClanCouncilFormComponent } from "app/clan-council-form/clan-council-form.component";
-import { RunaFormComponent } from "app/runa-form/runa-form.component";
-import { RegisterActivityComponent } from "app/register-activity/register-activity.component";
-import { StatsComponent } from "app/stats/stats.component";
-import { PointsComponent } from "app/points/points.component";
+import { DashboardComponent } from "app/views/dashboard/dashboard.component";
+import { UserProfileComponent } from "app/views/user-profile/user-profile.component";
+import { ClanCouncilFormComponent } from "app/views/clan-council-form/clan-council-form.component";
+import { RunaFormComponent } from "app/views/runa-form/runa-form.component";
+import { RegisterActivityComponent } from "app/views/register-activity/register-activity.component";
+import { StatsComponent } from "app/views/stats/stats.component";
+import { PointsComponent } from "app/views/points/points.component";
 
 export const AdminLayoutRoutes: Routes = [
   { path: "dashboard", component: DashboardComponent },

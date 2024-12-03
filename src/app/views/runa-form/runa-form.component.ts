@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, ElementRef } from "@angular/core";
 import { FormBuilder, FormGroup } from "@angular/forms";
-import { CanvasService } from "../services/canvas.service";
+import { CanvasService } from "app/services/canvas.service";
 
 @Component({
   selector: "app-runa-form",

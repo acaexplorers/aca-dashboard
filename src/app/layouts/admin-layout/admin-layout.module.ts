@@ -34,8 +34,6 @@ import { MatDatepickerModule } from "@angular/material/datepicker";
 import { MatNativeDateModule } from "@angular/material/core";
 
 import { MatSnackBarModule } from "@angular/material/snack-bar";
-import { MatDialogModule } from "@angular/material/dialog";
-
 import { MatTableModule } from "@angular/material/table";
 import { MatButtonToggleModule } from "@angular/material/button-toggle";
 import { MatExpansionModule } from "@angular/material/expansion";
@@ -58,7 +56,6 @@ import { MatExpansionModule } from "@angular/material/expansion";
     MatDatepickerModule,
     MatNativeDateModule,
     MatSnackBarModule,
-    MatDialogModule,
 
     MatTableModule,
     MatButtonToggleModule,

@@ -5,6 +5,7 @@ import { Routes, RouterModule } from '@angular/router';
 
 import { AdminLayoutComponent } from './layouts/admin-layout/admin-layout.component';
 import { LoginComponent } from './views/login/login.component';
+import { MatDialogModule } from '@angular/material/dialog';
 
 const routes: Routes = [
   {
@@ -39,9 +40,11 @@ const routes: Routes = [
     BrowserModule,
     RouterModule.forRoot(routes,{
        useHash: true
-    })
+    }),
+    MatDialogModule
   ],
   exports: [
+    MatDialogModule
   ],
 })
 export class AppRoutingModule { }

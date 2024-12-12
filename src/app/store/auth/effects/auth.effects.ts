@@ -16,8 +16,8 @@ export class AuthEffects {
         this.authService.login(username, password).pipe(
           map((response) =>
             AuthActions.loginSuccess({
-              token: response.data.jwt,
-              username: response.data.user.username,
+              token: response.jwt,
+              username: response.user.username,
             })
           ),
           catchError((error) => of(AuthActions.loginFailure({ error })))

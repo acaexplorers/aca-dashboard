@@ -16,6 +16,9 @@ import { EffectsModule } from "@ngrx/effects";
 import { StoreDevtoolsModule } from "@ngrx/store-devtools";
 import { AuthStoreModule } from "app/store/auth/auth.store.module";
 import { environment } from "../environments/environment";
+import { metaReducers } from "./store/meta-reducers";
+
+
 
 @NgModule({
   imports: [
@@ -27,7 +30,7 @@ import { environment } from "../environments/environment";
     RouterModule,
     AppRoutingModule,
     MatIconModule,
-    StoreModule.forRoot({}),
+    StoreModule.forRoot({}, { metaReducers }),
     EffectsModule.forRoot([]),
     StoreDevtoolsModule.instrument({
       logOnly: environment.production,

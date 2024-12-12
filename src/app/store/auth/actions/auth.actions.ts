@@ -17,3 +17,6 @@ export const loginFailure = createAction(
   "[Auth] Login Failure",
   props<{ error: any }>()
 );
+
+// Triggered to clear store reducers
+export const logout = createAction('[Auth] Logout');

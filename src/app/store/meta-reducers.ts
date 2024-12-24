@@ -5,11 +5,14 @@ import { logout } from "app/store/auth/actions/auth.actions";
 export function localStorageSyncReducer(
   reducer: ActionReducer<any>
 ): ActionReducer<any> {
-  return localStorageSync({ keys: ["auth"], rehydrate: true })(reducer);
+  return localStorageSync({ keys: ["auth", "reports"], rehydrate: true })(
+    reducer
+  );
 }
 
 export const metaReducers: Array<MetaReducer<any, any>> = [
-  localStorageSyncReducer, clearStateMetaReducer
+  localStorageSyncReducer,
+  clearStateMetaReducer,
 ];
 
 export function clearStateMetaReducer(

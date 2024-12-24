@@ -55,7 +55,6 @@ export class LoginComponent implements OnInit {
   }
 
   onLogin(username: string, password: string) {
-    // Dispatch the loginRequest action with the username and password
     this.store.dispatch(AuthActions.loginRequest({ username, password }));
   }
 }

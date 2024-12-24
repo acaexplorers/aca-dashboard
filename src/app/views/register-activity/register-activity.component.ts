@@ -2,6 +2,14 @@ import { Component, OnInit } from "@angular/core";
 import { FormControl } from "@angular/forms";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { MatDialog } from "@angular/material/dialog";
+import { Store } from "@ngrx/store";
+import { Observable } from "rxjs";
+import {
+  selectWeeklyReports,
+  selectSubmitReportLoading,
+} from "app/store/reports/selectors/reports.selectors";
+import { selectAuthUsername } from "app/store/auth/selectors/auth.selectors";
+import * as ReportsActions from "app/store/reports/actions/reports.actions";
 import { DialogComponent } from "app/components/dialog/dialog.component";
 
 @Component({
@@ -36,32 +44,55 @@ export class RegisterActivityComponent implements OnInit {
   added = new FormControl("");
   studied = new FormControl("");
   currentDate = "";
-  userReports: any[] = [];
+  userReports: any[] = []; // Local state for reports
+  userReports$: Observable<any[]>; // Observable for weekly reports
+  loadingSubmit$: Observable<boolean>; // Observable for submit report loading state
+  username$: Observable<string | null>; // Observable for username
 
-  constructor(public dialog: MatDialog, private snackBar: MatSnackBar) {}
+  constructor(
+    public dialog: MatDialog,
+    private snackBar: MatSnackBar,
+    private store: Store
+  ) {}
 
   ngOnInit(): void {
-    this.getWeekReports();
+    // Select observables
+    this.userReports$ = this.store.select(selectWeeklyReports);
+    this.loadingSubmit$ = this.store.select(selectSubmitReportLoading);
+    this.username$ = this.store.select(selectAuthUsername);
+
+    // Fetch weekly reports
+    this.username$.subscribe((username) => {
+      if (username) {
+        this.getWeekReports(username);
+      }
+    });
+
+    // Subscribe to userReports$ and update local state
+    this.userReports$.subscribe((reports) => {
+      this.userReports = reports.map((report: any) => ({
+        day_reported: report.attributes.day_reported,
+        added: report.attributes.added,
+        studied: report.attributes.studied,
+      }));
+      this.updateDaysCheckMarks();
+      this.updateSelectedDay();
+    });
   }
 
   getFormattedDate(date: Date): string {
     return date.toLocaleDateString("en-CA"); // YYYY-MM-DD format
   }
 
-  getWeekReports(): void {
-    // Mock user report retrieval
-    const mockUserReports = [
-      { day_reported: "2023-10-01", added: "2", studied: "3" },
-      { day_reported: "2023-10-02", added: "4", studied: "5" },
-    ];
+  getWeekReports(username: string): void {
+    const date = new Date();
+    const endDate = this.getFormattedDate(date);
+    date.setDate(date.getDate() - 6);
+    const startDate = this.getFormattedDate(date);
 
-    this.userReports = mockUserReports;
-    this.updateMemoryReports();
-  }
-
-  updateMemoryReports(): void {
-    const reportsReady = this.userReports.map((report) => report.day_reported);
-    this.daysCheckMarks = reportsReady;
+    this.store.dispatch(
+      ReportsActions.loadWeeklyReports({ startDate, endDate, username })
+    );
   }
 
   getDay(selectedDayIndex: number): Date {
@@ -70,22 +101,74 @@ export class RegisterActivityComponent implements OnInit {
     return new Date(today.setDate(today.getDate() + dayDifference));
   }
 
-  submitReport(): void {
+  updateDaysCheckMarks(): void {
+    this.daysCheckMarks = this.userReports.map((report) => report.day_reported);
+  }
+
+  updateSelectedDay(): void {
     const currentDate = this.getFormattedDate(this.getDay(this.selectedIndex));
-    const dataToSend = {
-      studied: this.studied.value,
-      added: this.added.value,
-      day_reported: currentDate,
-    };
+    this.currentDate = currentDate;
 
-    // Simulating API call success
-    this.snackBar.open("Report submitted successfully!", "OK", {
-      duration: 2000,
+    const report = this.userReports.find(
+      (r: any) => r.day_reported === currentDate
+    );
+    if (report) {
+      this.added.setValue(report.added);
+      this.studied.setValue(report.studied);
+    } else {
+      this.added.setValue("");
+      this.studied.setValue("");
+    }
+
+    localStorage.setItem("selectedIndex", this.selectedIndex.toString());
+  }
+
+  submitReport(): void {
+    this.username$.subscribe((username) => {
+      if (username) {
+        const currentDate = this.getFormattedDate(
+          this.getDay(this.selectedIndex)
+        );
+        const dataToSend = {
+          studied: this.studied.value,
+          added: this.added.value,
+          legacy_username: username,
+          creation: this.getFormattedDate(new Date()),
+          day_reported: currentDate,
+        };
+
+        this.store.dispatch(
+          ReportsActions.submitUserReport({ report: { data: dataToSend } })
+        );
+
+        this.updateMemoryReports(
+          currentDate,
+          this.added.value,
+          this.studied.value
+        );
+
+        this.snackBar.open("Report submitted successfully!", "OK", {
+          duration: 2000,
+        });
+        this.openDialog();
+      }
     });
-    this.openDialog();
+  }
 
-    // Update local reports memory
-    this.updateMemoryReports();
+  updateMemoryReports(
+    day_reported: string,
+    added: string,
+    studied: string
+  ): void {
+    const existingIndex = this.userReports.findIndex(
+      (report) => report.day_reported === day_reported
+    );
+    if (existingIndex !== -1) {
+      this.userReports[existingIndex] = { day_reported, added, studied };
+    } else {
+      this.userReports.push({ day_reported, added, studied });
+    }
+    this.updateDaysCheckMarks();
   }
 
   openDialog(): void {

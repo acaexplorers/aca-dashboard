@@ -15,10 +15,9 @@ import { StoreModule } from "@ngrx/store";
 import { EffectsModule } from "@ngrx/effects";
 import { StoreDevtoolsModule } from "@ngrx/store-devtools";
 import { AuthStoreModule } from "app/store/auth/auth.store.module";
+import { ReportsStoreModule } from "app/store/reports/reports.store.module";
 import { environment } from "../environments/environment";
 import { metaReducers } from "./store/meta-reducers";
-
-
 
 @NgModule({
   imports: [
@@ -36,6 +35,7 @@ import { metaReducers } from "./store/meta-reducers";
       logOnly: environment.production,
     }),
     AuthStoreModule,
+    ReportsStoreModule,
   ],
   declarations: [AppComponent, AdminLayoutComponent, LoginComponent],
   providers: [],

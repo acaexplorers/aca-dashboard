@@ -48,6 +48,7 @@ export class RegisterActivityComponent implements OnInit {
   userReports$: Observable<any[]>; // Observable for weekly reports
   loadingSubmit$: Observable<boolean>; // Observable for submit report loading state
   username$: Observable<string | null>; // Observable for username
+  private username: string | null = null; // Local state for username
 
   constructor(
     public dialog: MatDialog,
@@ -64,6 +65,7 @@ export class RegisterActivityComponent implements OnInit {
     // Fetch weekly reports
     this.username$.subscribe((username) => {
       if (username) {
+        this.username = username;
         this.getWeekReports(username);
       }
     });
@@ -124,35 +126,37 @@ export class RegisterActivityComponent implements OnInit {
   }
 
   submitReport(): void {
-    this.username$.subscribe((username) => {
-      if (username) {
-        const currentDate = this.getFormattedDate(
-          this.getDay(this.selectedIndex)
-        );
-        const dataToSend = {
-          studied: this.studied.value,
-          added: this.added.value,
-          legacy_username: username,
-          creation: this.getFormattedDate(new Date()),
-          day_reported: currentDate,
-        };
+    if (this.username) {
+      const currentDate = this.getFormattedDate(
+        this.getDay(this.selectedIndex)
+      );
+      const dataToSend = {
+        studied: this.studied.value,
+        added: this.added.value,
+        legacy_username: this.username, // Use the stored username
+        creation: this.getFormattedDate(new Date()),
+        day_reported: currentDate,
+      };
 
-        this.store.dispatch(
-          ReportsActions.submitUserReport({ report: { data: dataToSend } })
-        );
+      this.store.dispatch(
+        ReportsActions.submitUserReport({ report: { data: dataToSend } })
+      );
 
-        this.updateMemoryReports(
-          currentDate,
-          this.added.value,
-          this.studied.value
-        );
+      this.updateMemoryReports(
+        currentDate,
+        this.added.value,
+        this.studied.value
+      );
 
-        this.snackBar.open("Report submitted successfully!", "OK", {
-          duration: 2000,
-        });
-        this.openDialog();
-      }
-    });
+      this.snackBar.open("Report submitted successfully!", "OK", {
+        duration: 2000,
+      });
+      this.openDialog();
+    } else {
+      this.snackBar.open("Error: Username not available.", "OK", {
+        duration: 2000,
+      });
+    }
   }
 
   updateMemoryReports(

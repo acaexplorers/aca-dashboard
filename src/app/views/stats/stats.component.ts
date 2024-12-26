@@ -1,4 +1,9 @@
 import { Component, OnInit } from "@angular/core";
+import { Store } from "@ngrx/store";
+import { Observable } from "rxjs";
+import { selectGlobalReports } from "app/store/reports/selectors/reports.selectors";
+import * as ReportsActions from "app/store/reports/actions/reports.actions";
+import { formatDate } from "@angular/common";
 
 @Component({
   selector: "app-stats",
@@ -7,8 +12,6 @@ import { Component, OnInit } from "@angular/core";
 })
 export class StatsComponent implements OnInit {
   viewMode: string = "cards"; // Default to card view
-  mockStudents: any[] = []; // Mock data for students (table data)
-  mockCardStudents: any[] = []; // Data for the card view
   filteredStudents: any[] = []; // Filtered students for table view
   filteredCardStudents: any[] = []; // Filtered students for card view
   searchTerm: string = ""; // Search term for filtering
@@ -19,153 +22,186 @@ export class StatsComponent implements OnInit {
     "studied",
     "added",
     "level",
-  ]; // Define table columns
-  selectedWeek: string = ""; // Selected week from date picker
-  weeks: string[] = [
-    "07/17/24–07/23/24",
-    "07/10/24–07/16/24",
-    "07/03/24–07/09/24",
-  ]; // Mock weeks
+  ]; // Table columns
+  selectedWeek: Date = new Date(); // Selected week from date picker
+  daysOfWeek: Date[] = []; // Days in the selected week
+  userReports$: Observable<any>; // Reports from the store
+  groupedReports: any = {}; // Grouped reports by username
+  isLoading: boolean = false; // Loading indicator
+  error: string | null = null; // Error message
 
-  constructor() {
-    console.log("on stats component initialized");
-  }
+  constructor(private store: Store) {}
 
   ngOnInit(): void {
-    // Initialize mock data for students
-    const students = [
-      { name: "John Doe", days: this.getMockDaysData() },
-      { name: "Jane Smith", days: this.getMockDaysData() },
-      { name: "Arley", days: this.getMockDaysData() },
-    ];
+    // Initialize userReports observable
+    this.userReports$ = this.store.select(selectGlobalReports);
 
-    // Preprocess the data for both table and card views
-    this.mockStudents = this.prepareTableData(students); // Prepare data for the table view
-    this.filteredStudents = [...this.mockStudents]; // Initially show all students for table view
-    this.mockCardStudents = this.prepareCardData(students); // Prepare data for card view
-    this.filteredCardStudents = [...this.mockCardStudents]; // Initially show all students for card view
+    // Fetch reports for the current week
+    this.fetchReports();
 
-    this.selectedWeek = this.weeks[0]; // Set default selected week
+    // Subscribe to userReports$ and process the data
+    this.userReports$.subscribe({
+      next: (reports) => {
+        console.log("reports", reports);
+        this.isLoading = false;
+        this.error = null;
+        this.groupReportsByUser(reports.data);
+        this.updateFilteredData();
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.error = "Failed to fetch reports. Please try again.";
+        console.error("Error fetching reports:", err);
+      },
+    });
+
+    // Calculate days of the current week
+    this.calculateDaysOfWeek();
   }
 
-  // Mock days data for each student
-  getMockDaysData() {
-    return [
-      {
-        day: "Wednesday",
-        studied: 46,
-        added: 0,
-        level: "Intermediate",
-        addedOn: "Wed",
-      },
-      {
-        day: "Thursday",
-        studied: 16,
-        added: 0,
-        level: "Advanced",
-        addedOn: "Mon",
-      },
-      {
-        day: "Friday",
-        studied: 4,
-        added: 0,
-        level: "Beginner",
-        addedOn: "Sat",
-      },
-      {
-        day: "Saturday",
-        studied: 28,
-        added: 1,
-        level: "Intermediate",
-        addedOn: "Sat",
-      },
-      {
-        day: "Sunday",
-        studied: 4,
-        added: 0,
-        level: "Advanced",
-        addedOn: "Sun",
-      },
-      {
-        day: "Monday",
-        studied: 51,
-        added: 0,
-        level: "Intermediate",
-        addedOn: "Mon",
-      },
-      {
-        day: "Tuesday",
-        studied: 4,
-        added: 0,
-        level: "Beginner",
-        addedOn: "Tue",
-      },
-    ];
+  // Fetch reports based on the selected week
+  fetchReports(): void {
+    const startOfWeek = this.getStartOfWeek(this.selectedWeek);
+    const endOfWeek = this.getEndOfWeek(this.selectedWeek);
+    const formattedStartDate = formatDate(startOfWeek, "yyyy-MM-dd", "en");
+    const formattedEndDate = formatDate(endOfWeek, "yyyy-MM-dd", "en");
+
+    this.isLoading = true; // Set loading state
+    this.store.dispatch(
+      ReportsActions.loadGlobalReports({
+        startDate: formattedStartDate,
+        endDate: formattedEndDate,
+      })
+    );
   }
 
-  // Flatten the student data to make it easy to display in a table
-  prepareTableData(students: any[]): any[] {
+  // Calculate the start and end of the week for the selected date
+  calculateDaysOfWeek(): void {
+    const startOfWeek = this.getStartOfWeek(this.selectedWeek);
+    this.daysOfWeek = Array.from(
+      { length: 7 },
+      (_, i) => new Date(startOfWeek.getTime() + i * 24 * 60 * 60 * 1000)
+    );
+  }
+
+  getStartOfWeek(date: Date): Date {
+    const day = date.getDay();
+    const diff = date.getDate() - day;
+    return new Date(date.setDate(diff));
+  }
+
+  getEndOfWeek(date: Date): Date {
+    const startOfWeek = this.getStartOfWeek(date);
+    return new Date(startOfWeek.getTime() + 6 * 24 * 60 * 60 * 1000);
+  }
+
+  getDayFromDate(dateString: string): string {
+    const daysOfWeek = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ];
+    const date = new Date(dateString);
+    return daysOfWeek[date.getDay()];
+  }
+
+  // Group reports by username
+  groupReportsByUser(reports: any[]): void {
+    this.groupedReports = reports.reduce((acc, report) => {
+      const username = report.attributes?.legacy_username || "Unknown User";
+      if (!acc[username]) {
+        acc[username] = [];
+      }
+      acc[username].push(report.attributes || {});
+      return acc;
+    }, {});
+  }
+
+  // Update filtered data based on the view mode
+  updateFilteredData(): void {
+    this.filteredStudents = this.prepareTableData();
+    this.filteredCardStudents = this.prepareCardData();
+    console.log("this.filteredCardStudents", this.filteredCardStudents);
+  }
+
+  // Prepare table data dynamically
+  prepareTableData(): any[] {
     const allRows = [];
-    students.forEach((student) => {
-      student.days.forEach((day) => {
+    Object.keys(this.groupedReports).forEach((username) => {
+      this.groupedReports[username].forEach((day: any) => {
         allRows.push({
-          name: student.name,
-          day: day.day,
+          name: username,
+          day: day.day_reported,
           studied: day.studied,
           added: day.added,
-          level: day.level,
-          addedOn: day.addedOn,
+          level: day.level || "N/A",
+          addedOn: day.day_reported,
         });
       });
     });
     return allRows;
   }
 
-  // Prepare summarized data for the card view
-  prepareCardData(students: any[]): any[] {
-    return students.map((student) => {
-      const totalStudied = student.days.reduce(
+  // Prepare card data dynamically
+  prepareCardData(): any[] {
+    return Object.keys(this.groupedReports).map((username) => {
+      const totalStudied = this.groupedReports[username].reduce(
         (acc: number, day: any) => acc + day.studied,
         0
       );
-      const totalAdded = student.days.reduce(
+      const totalAdded = this.groupedReports[username].reduce(
         (acc: number, day: any) => acc + day.added,
         0
       );
+
+      const daysWithAdditionalFields = this.groupedReports[username].map(
+        (day: any) => {
+          const dayOfWeek = this.getDayFromDate(day.day_reported); // Calculate day
+          const addedOnDay = this.getDayFromDate(day.creation); // Calculate addedOn
+          return {
+            ...day,
+            day: dayOfWeek,
+            addedOn: addedOnDay,
+          };
+        }
+      );
+
       return {
-        name: student.name,
+        name: username,
         totalStudied,
         totalAdded,
-        days: student.days, // Keep day data for collapsible details
+        days: daysWithAdditionalFields,
       };
     });
   }
 
   // Filter students based on search term
-  filterStudents() {
+  filterStudents(): void {
     if (this.searchTerm.trim() === "") {
-      // If the search term is empty, reset both lists to show all students
-      this.filteredStudents = [...this.mockStudents]; // For table view
-      this.filteredCardStudents = [...this.mockCardStudents]; // For card view
+      this.updateFilteredData();
     } else {
-      // Filter for the table view
-      this.filteredStudents = this.mockStudents.filter((student) =>
+      this.filteredStudents = this.prepareTableData().filter((student) =>
         student.name.toLowerCase().includes(this.searchTerm.toLowerCase())
       );
-      // Filter for the card view
-      this.filteredCardStudents = this.mockCardStudents.filter((student) =>
+      this.filteredCardStudents = this.prepareCardData().filter((student) =>
         student.name.toLowerCase().includes(this.searchTerm.toLowerCase())
       );
     }
   }
 
   // Switch between table and card views
-  switchView(view: string) {
+  switchView(view: string): void {
     this.viewMode = view;
   }
 
-  ngDoCheck(): void {
-    // This runs every time Angular checks for changes
-    console.log("Current View Mode:", this.viewMode);
+  // Handle week change
+  onWeekChange(event: Date): void {
+    this.selectedWeek = event;
+    this.calculateDaysOfWeek();
+    this.fetchReports();
   }
 }

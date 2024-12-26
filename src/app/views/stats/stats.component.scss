@@ -1,5 +1,6 @@
 .container {
   margin: 20px;
+  height: 80vh;
 }
 
 .card-view,
@@ -90,4 +91,8 @@
 .mat-flat-button {
   background-color: #f44336;
   color: white;
+}
+
+.date-input {
+  margin-bottom: 30px;
 }

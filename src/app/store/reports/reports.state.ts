@@ -1,5 +1,5 @@
 export interface ReportsState {
-  globalReports: any[]; // Global reports for all users
+  globalReports: any; // Global reports for all users
   weeklyReports: any[]; // Weekly reports for a specific user
   loadingGlobal: boolean; // Loading state for global reports
   loadingWeekly: boolean; // Loading state for weekly reports
@@ -10,7 +10,7 @@ export interface ReportsState {
 }
 
 export const initialReportsState: ReportsState = {
-  globalReports: [],
+  globalReports: {},
   weeklyReports: [],
   loadingGlobal: false,
   loadingWeekly: false,

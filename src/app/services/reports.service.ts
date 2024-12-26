@@ -5,6 +5,7 @@ import { Observable } from "rxjs";
 import { map, switchMap, take } from "rxjs/operators";
 import { selectAuthToken } from "app/store/auth/selectors/auth.selectors";
 import { environment } from "../../environments/environment";
+import { ApiResponse } from "app/utils/types";
 
 @Injectable({
   providedIn: "root",
@@ -35,7 +36,7 @@ export class ReportsService {
         });
 
         const url = `${this.baseUrl}/scholar-reports?filters[day_reported][$gte]=${startDate}&filters[day_reported][$lte]=${endDate}`;
-        return this.http.get(url, { headers });
+        return this.http.get<ApiResponse<any>>(url, { headers });
       })
     );
   }
@@ -78,7 +79,7 @@ export class ReportsService {
         });
   
         const url = `${this.baseUrl}/scholar-reports?filters[day_reported][$gte]=${startDate}&filters[day_reported][$lte]=${endDate}&filters[legacy_username]=${username}`;
-        return this.http.get<{ data: any[] }>(url, { headers }).pipe(
+        return this.http.get<ApiResponse<any>>(url, { headers }).pipe(
           map((response) => response.data)
         );
       })

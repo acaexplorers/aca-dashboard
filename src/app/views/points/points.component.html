@@ -1,4 +1,25 @@
 <div class="points-container">
+  <!-- Date Picker for Week Selection -->
+  <mat-form-field class="date-input">
+    <mat-label>Select Week Starting Day</mat-label>
+    <input
+      matInput
+      [matDatepicker]="picker"
+      [(ngModel)]="selectedWeek"
+      placeholder="Select a week"
+    />
+    <mat-hint>MM/DD/YYYY</mat-hint>
+    <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-datepicker #picker></mat-datepicker>
+  </mat-form-field>
+
+  <!-- Botón de búsqueda -->
+  <button mat-flat-button color="primary" (click)="fetchWeeklyData()" style="margin-left: 10px;">
+    Buscar
+  </button>
+
+  
+  <!-- Search Input -->
   <div class="search-bar">
     <mat-form-field>
       <mat-label>Search</mat-label>

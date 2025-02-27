@@ -1,5 +1,6 @@
 import { Component } from "@angular/core";
 import { MatTableDataSource } from "@angular/material/table";
+import { formatDate } from "@angular/common";
 
 export interface StudentData {
   student: string;
@@ -110,11 +111,43 @@ export class PointsComponent {
       activeStreak: 4,
       activeDaysStreak: "6 Days",
     },
-    // More rows...
   ]);
+
+  selectedWeek: Date = new Date(); // Selected week from date picker
+
+  constructor() {}
 
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase(); // Filter the data
+  }
+
+  fetchWeeklyData(): void {
+    const startOfWeek = this.getStartOfWeek(this.selectedWeek);
+    const endOfWeek = this.getEndOfWeek(this.selectedWeek);
+    const formattedStartDate = formatDate(startOfWeek, "yyyy-MM-dd", "en");
+    const formattedEndDate = formatDate(endOfWeek, "yyyy-MM-dd", "en");
+
+    // Aquí puedes agregar la lógica para obtener los datos de la semana seleccionada
+    console.log("Fetching data from:", formattedStartDate, "to", formattedEndDate);
+
+    // Ejemplo: Filtrar los datos existentes (simulación)
+    const filteredData = this.dataSource.data.filter((item) => {
+      // Aquí puedes agregar la lógica de filtrado basada en la semana seleccionada
+      return true; // Cambia esto según tu lógica
+    });
+
+    this.dataSource.data = filteredData; // Actualiza la tabla con los datos filtrados
+  }
+
+  getStartOfWeek(date: Date): Date {
+    const day = date.getDay();
+    const diff = date.getDate() - day;
+    return new Date(date.setDate(diff));
+  }
+
+  getEndOfWeek(date: Date): Date {
+    const startOfWeek = this.getStartOfWeek(date);
+    return new Date(startOfWeek.getTime() + 6 * 24 * 60 * 60 * 1000);
   }
 }

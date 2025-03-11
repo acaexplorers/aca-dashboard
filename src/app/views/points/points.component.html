@@ -18,22 +18,6 @@
     Buscar
   </button>
 
-  <!-- Botón de generación de reporte -->
-  <button mat-flat-button color="accent" (click)="generateReport()" style="margin-left: 10px;">
-    Generate Report
-  </button>
-
-  <!-- Search Input -->
-  <div class="search-bar">
-    <mat-form-field>
-      <mat-label>Search</mat-label>
-      <input
-        matInput
-        (keyup)="applyFilter($event)"
-        placeholder="Search for students..."
-      />
-    </mat-form-field>
-  </div>
 
   <!-- Tabla de datos -->
   <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
@@ -141,4 +125,4 @@
     <!-- Data Row -->
     <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
   </table>
-</div>
+ 

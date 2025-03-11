@@ -25,7 +25,7 @@ export interface StudentData {
   addedStreak: number;
   activeStreak: number;
   activeDaysStreak: string;
-}
+  }
 
 @Component({
   selector: "app-points",
@@ -54,7 +54,7 @@ export class PointsComponent implements OnInit {
     "activeDaysStreak",
     "action",
   ];
-
+  daysOfWeek: Date[] = []; // Days in the selected week
   dataSource = new MatTableDataSource<StudentData>(); // Usamos un MatTableDataSource vacío
   selectedWeek: Date = new Date(); // Semana seleccionada
   pointsData$: Observable<any>; // Observable para los datos de puntos
@@ -67,7 +67,8 @@ export class PointsComponent implements OnInit {
     // Inicializar el observable para los datos de puntos
     this.pointsData$ = this.store.select(selectPointsData);
 
-    // Suscribirse a los cambios en los datos
+    this.fetchWeeklyData(); 
+
     this.pointsData$.subscribe({
       next: (data) => {
         console.log("Points Data:", data);
@@ -82,25 +83,17 @@ export class PointsComponent implements OnInit {
       },
     });
 
-    // Cargar los datos iniciales
-    this.fetchWeeklyData();
-  }
-
-  applyFilter(event: Event) {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource.filter = filterValue.trim().toLowerCase(); // Filtrar los datos
+    this.calculateDaysOfWeek();
   }
 
   fetchWeeklyData(): void {
-    this.isLoading = true;
-    this.error = null;
-
     const startOfWeek = this.getStartOfWeek(this.selectedWeek);
     const endOfWeek = this.getEndOfWeek(this.selectedWeek);
     const formattedStartDate = formatDate(startOfWeek, "yyyy-MM-dd", "en");
     const formattedEndDate = formatDate(endOfWeek, "yyyy-MM-dd", "en");
 
-    // Despachar la acción para cargar los datos de la semana seleccionada
+    this.isLoading = true;
+    this.error = null;
     this.store.dispatch(
       PointsActions.loadPointsData({
         startDate: formattedStartDate,
@@ -126,14 +119,38 @@ export class PointsComponent implements OnInit {
     console.log("Generating report for the week:", formattedStartDate, "to", formattedEndDate);
   }
 
-  getStartOfWeek(date: Date): Date {
-    const day = date.getDay();
-    const diff = date.getDate() - day;
-    return new Date(date.setDate(diff));
-  }
 
-  getEndOfWeek(date: Date): Date {
-    const startOfWeek = this.getStartOfWeek(date);
-    return new Date(startOfWeek.getTime() + 6 * 24 * 60 * 60 * 1000);
-  }
+    // Calculate the start and end of the week for the selected date
+    calculateDaysOfWeek(): void {
+      const startOfWeek = this.getStartOfWeek(this.selectedWeek);
+      this.daysOfWeek = Array.from(
+        { length: 7 },
+        (_, i) => new Date(startOfWeek.getTime() + i * 24 * 60 * 60 * 1000)
+      );
+    }
+  
+    getStartOfWeek(date: Date): Date {
+      const day = date.getDay();
+      const diff = date.getDate() - day;
+      return new Date(date.setDate(diff));
+    }
+  
+    getEndOfWeek(date: Date): Date {
+      const startOfWeek = this.getStartOfWeek(date);
+      return new Date(startOfWeek.getTime() + 6 * 24 * 60 * 60 * 1000);
+    }
+
+    getDayFromDate(dateString: string): string {
+      const daysOfWeek = [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+      ];
+      const date = new Date(dateString);
+      return daysOfWeek[date.getDay()];
+    }   
 }

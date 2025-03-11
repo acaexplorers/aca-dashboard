@@ -9,6 +9,8 @@ import { AppComponent } from "./app.component";
 import { AdminLayoutComponent } from "./layouts/admin-layout/admin-layout.component";
 import { LoginComponent } from "./views/login/login.component";
 import { MatIconModule } from "@angular/material/icon";
+import { pointsReducer } from "./store/points/reducers/points.reducer"; // Asegúrate de que esta ruta sea correcta
+import { PointsEffects } from "./store/points/effects/points.effects"; // Asegúrate de que esta ruta sea correcta
 
 // NgRx Imports
 import { StoreModule } from "@ngrx/store";
@@ -29,6 +31,8 @@ import { metaReducers } from "./store/meta-reducers";
     RouterModule,
     AppRoutingModule,
     MatIconModule,
+    StoreModule.forRoot({ points: pointsReducer }), // Configura el reducer
+    EffectsModule.forRoot([PointsEffects]), // Configura los efectos
     StoreModule.forRoot({}, { metaReducers }),
     EffectsModule.forRoot([]),
     StoreDevtoolsModule.instrument({

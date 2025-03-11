@@ -18,7 +18,11 @@
     Buscar
   </button>
 
-  
+  <!-- Botón de generación de reporte -->
+  <button mat-flat-button color="accent" (click)="generateReport()" style="margin-left: 10px;">
+    Generate Report
+  </button>
+
   <!-- Search Input -->
   <div class="search-bar">
     <mat-form-field>
@@ -31,7 +35,9 @@
     </mat-form-field>
   </div>
 
+  <!-- Tabla de datos -->
   <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+    <!-- Columnas de la tabla -->
     <ng-container matColumnDef="student">
       <th mat-header-cell *matHeaderCellDef>Student</th>
       <td mat-cell *matCellDef="let element">{{ element.student }}</td>
@@ -125,7 +131,7 @@
     <ng-container matColumnDef="action">
       <th mat-header-cell *matHeaderCellDef>Action</th>
       <td mat-cell *matCellDef="let element">
-        <button mat-button class="generate-button">GENERATE</button>
+        <button mat-button class="generate-button" (click)="generateReport()">GENERATE</button>
       </td>
     </ng-container>
 

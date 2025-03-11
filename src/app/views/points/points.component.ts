@@ -1,5 +1,9 @@
-import { Component } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { MatTableDataSource } from "@angular/material/table";
+import { Store } from "@ngrx/store";
+import { Observable } from "rxjs";
+import { selectPointsData } from "app/store/points/selectors/points.selector"; // Asegúrate de que esta ruta sea correcta
+import * as PointsActions from "app/store/points/actions/points.action"; // Asegúrate de que esta ruta sea correcta
 import { formatDate } from "@angular/common";
 
 export interface StudentData {
@@ -28,7 +32,7 @@ export interface StudentData {
   templateUrl: "./points.component.html",
   styleUrls: ["./points.component.scss"],
 })
-export class PointsComponent {
+export class PointsComponent implements OnInit {
   displayedColumns: string[] = [
     "student",
     "level",
@@ -50,94 +54,76 @@ export class PointsComponent {
     "activeDaysStreak",
     "action",
   ];
-  dataSource = new MatTableDataSource([
-    {
-      student: "Deborah",
-      level: 0,
-      habitAction: 0,
-      points: 218,
-      totalPoints: 48802,
-      contributed: "-",
-      added: 1,
-      status: "Active",
-      studyRate: 52,
-      daysStudied: 6,
-      streak: 68,
-      studied: 367,
-      max: 91,
-      maxLevel: 0,
-      activeDays: 6,
-      addedStreak: 1,
-      activeStreak: 9,
-      activeDaysStreak: "14 Days",
-    },
-    {
-      student: "Teacher",
-      level: 8,
-      habitAction: 0,
-      points: 187,
-      totalPoints: 112051,
-      contributed: "100 | 68.1",
-      added: 2,
-      status: "Active",
-      studyRate: 23,
-      daysStudied: 1,
-      streak: 2,
-      studied: 163,
-      max: 163,
-      maxLevel: 8,
-      activeDays: 1,
-      addedStreak: 1,
-      activeStreak: 6,
-      activeDaysStreak: "2 Days",
-    },
-    {
-      student: "Arley",
-      level: 2,
-      habitAction: 0,
-      points: 87,
-      totalPoints: 441603,
-      contributed: "31.9",
-      added: 0,
-      status: "Active",
-      studyRate: 8,
-      daysStudied: 1,
-      streak: 11,
-      studied: 58,
-      max: 58,
-      maxLevel: 2,
-      activeDays: 1,
-      addedStreak: 0,
-      activeStreak: 4,
-      activeDaysStreak: "6 Days",
-    },
-  ]);
 
-  selectedWeek: Date = new Date(); // Selected week from date picker
+  dataSource = new MatTableDataSource<StudentData>(); // Usamos un MatTableDataSource vacío
+  selectedWeek: Date = new Date(); // Semana seleccionada
+  pointsData$: Observable<any>; // Observable para los datos de puntos
+  isLoading: boolean = false; // Indicador de carga
+  error: string | null = null; // Mensaje de error
 
-  constructor() {}
+  constructor(private store: Store) {}
+
+  ngOnInit(): void {
+    // Inicializar el observable para los datos de puntos
+    this.pointsData$ = this.store.select(selectPointsData);
+
+    // Suscribirse a los cambios en los datos
+    this.pointsData$.subscribe({
+      next: (data) => {
+        console.log("Points Data:", data);
+        this.isLoading = false;
+        this.error = null;
+        this.dataSource.data = data; // Actualizar la tabla con los datos recibidos
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.error = "Failed to fetch points data. Please try again.";
+        console.error("Error fetching points data:", err);
+      },
+    });
+
+    // Cargar los datos iniciales
+    this.fetchWeeklyData();
+  }
 
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource.filter = filterValue.trim().toLowerCase(); // Filter the data
+    this.dataSource.filter = filterValue.trim().toLowerCase(); // Filtrar los datos
   }
 
   fetchWeeklyData(): void {
+    this.isLoading = true;
+    this.error = null;
+
     const startOfWeek = this.getStartOfWeek(this.selectedWeek);
     const endOfWeek = this.getEndOfWeek(this.selectedWeek);
     const formattedStartDate = formatDate(startOfWeek, "yyyy-MM-dd", "en");
     const formattedEndDate = formatDate(endOfWeek, "yyyy-MM-dd", "en");
 
-    // Aquí puedes agregar la lógica para obtener los datos de la semana seleccionada
-    console.log("Fetching data from:", formattedStartDate, "to", formattedEndDate);
+    // Despachar la acción para cargar los datos de la semana seleccionada
+    this.store.dispatch(
+      PointsActions.loadPointsData({
+        startDate: formattedStartDate,
+        endDate: formattedEndDate,
+      })
+    );
+  }
 
-    // Ejemplo: Filtrar los datos existentes (simulación)
-    const filteredData = this.dataSource.data.filter((item) => {
-      // Aquí puedes agregar la lógica de filtrado basada en la semana seleccionada
-      return true; // Cambia esto según tu lógica
-    });
+  generateReport(): void {
+    const startOfWeek = this.getStartOfWeek(this.selectedWeek);
+    const endOfWeek = this.getEndOfWeek(this.selectedWeek);
+    const formattedStartDate = formatDate(startOfWeek, "yyyy-MM-dd", "en");
+    const formattedEndDate = formatDate(endOfWeek, "yyyy-MM-dd", "en");
 
-    this.dataSource.data = filteredData; // Actualiza la tabla con los datos filtrados
+    // Despachar la acción para generar el reporte
+    this.store.dispatch(
+      PointsActions.generatePointsReport({
+        startDate: formattedStartDate,
+        endDate: formattedEndDate,
+      })
+    );
+
+    console.log("Generating report for the week:", formattedStartDate, "to", formattedEndDate);
   }
 
   getStartOfWeek(date: Date): Date {

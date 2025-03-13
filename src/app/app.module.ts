@@ -18,6 +18,7 @@ import { EffectsModule } from "@ngrx/effects";
 import { StoreDevtoolsModule } from "@ngrx/store-devtools";
 import { AuthStoreModule } from "app/store/auth/auth.store.module";
 import { ReportsStoreModule } from "app/store/reports/reports.store.module";
+import { PointsStoreModule } from "app/store/points/points.store.module";
 import { environment } from "../environments/environment";
 import { metaReducers } from "./store/meta-reducers";
 
@@ -40,6 +41,7 @@ import { metaReducers } from "./store/meta-reducers";
     }),
     AuthStoreModule,
     ReportsStoreModule,
+    PointsStoreModule,
   ],
   declarations: [AppComponent, AdminLayoutComponent, LoginComponent],
   providers: [],

@@ -30,7 +30,7 @@ export class ReportsService {
    */
   getUsersReports(startDate: string, endDate: string): Observable<any> {
     return this.getToken().pipe(
-      //tap((token) => console.log("Token obtenido en getToken():", token)),
+      tap((token) => console.log("Token obtenido en getToken():", token)),
       switchMap((token) => {
         const headers = new HttpHeaders({
           "Content-Type": "application/json",

@@ -5,8 +5,7 @@
     <input
       matInput
       [matDatepicker]="picker"
-      [(ngModel)]="selectedWeek"
-      placeholder="Select a week"
+      (dateChange)="onChangeWeek($event.value)"
     />
     <mat-hint>MM/DD/YYYY</mat-hint>
     <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>

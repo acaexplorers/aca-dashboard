@@ -2,17 +2,19 @@ import { createAction, props } from "@ngrx/store";
 
 export const loadPointsData = createAction(   // Acción para cargar los datos de puntos
   "[Points] Load Points Data",
-  props<{ startDate: string; endDate: string }>()
+  props<{ startDate: string; endDate: string }>()  
 );
+console.log("Disparando acción loadPointsData");
 
 export const loadPointsDataSuccess = createAction(// Acción para cargar los datos de puntos
-  "[Points] Load Points Data",
-  props<{ data: any[] }>()
+  "[Points] Load Points Data Success",
+  props<{ globalReports: any[] }>()
 );
+console.log("Disparando acción loadPointsDataSuccess");
 
 export const loadPointsDataFailure = createAction(// Acción para indicar que hubo un error al cargar los datos
   "[Points] Load Points Data Failure",
-  props<{ error: any }>()
+  props<{ error: any }>() 
 );
 
 export const generatePointsReport = createAction( // Acción para generar un reporte de puntos

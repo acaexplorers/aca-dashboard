@@ -2,7 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import { MatTableDataSource } from "@angular/material/table";
 import { Store } from "@ngrx/store";
 import { Observable } from "rxjs";
-import { selectPointsData } from "app/store/points/selectors/points.selector"; // Asegúrate de que esta ruta sea correcta
+import { selectPointsData } from "app/store/points/points.selector"; // Asegúrate de que esta ruta sea correcta
 import * as PointsActions from "app/store/points/actions/points.action"; // Asegúrate de que esta ruta sea correcta
 import { formatDate } from "@angular/common";
 
@@ -56,9 +56,10 @@ export class PointsComponent implements OnInit {
     "action",
   ];
   daysOfWeek: Date[] = []; // Days in the selected week
-  dataSource = new MatTableDataSource<StudentData>(); // Usamos un MatTableDataSource vacío
   selectedWeek: Date = new Date(); // Semana seleccionada
+  dataSource = new MatTableDataSource<StudentData>(); // Usamos un MatTableDataSource vacío
   pointsData$: Observable<any>; // Observable para los datos de puntos
+  groupedPoints: any = {}; // Grouped points by username
   isLoading: boolean = false; // Indicador de carga
   error: string | null = null; // Mensaje de error
 
@@ -69,13 +70,14 @@ export class PointsComponent implements OnInit {
     this.pointsData$ = this.store.select(selectPointsData);
 
     this.fetchWeeklyData(); 
+    console.log("this.pointsData$ 1", this.pointsData$);
 
     this.pointsData$.subscribe({
-      next: (data) => {
-        console.log("pointsData:", data);
+      next: (points) => {
+        console.log("points", points);
         this.isLoading = false;
         this.error = null;
-        this.dataSource.data = data; // Actualizar la tabla con los datos recibidos
+        this.groupPointsByUser(points.data); // Agrupar los puntos por usuario
       },
       error: (err) => {
         this.isLoading = false;
@@ -92,15 +94,15 @@ export class PointsComponent implements OnInit {
     const endOfWeek = this.getEndOfWeek(this.selectedWeek);
     const formattedStartDate = formatDate(startOfWeek, "yyyy-MM-dd", "en");
     const formattedEndDate = formatDate(endOfWeek, "yyyy-MM-dd", "en");
-
+    
     this.isLoading = true;
-    this.error = null;
     this.store.dispatch(
       PointsActions.loadPointsData({
         startDate: formattedStartDate,
         endDate: formattedEndDate,
       })
     );
+    console.log("Selected week fetc pots:", this.selectedWeek);      
   }
 
   generateReport(): void {
@@ -109,9 +111,11 @@ export class PointsComponent implements OnInit {
     const formattedStartDate = formatDate(startOfWeek, "yyyy-MM-dd", "en");
     const formattedEndDate = formatDate(endOfWeek, "yyyy-MM-dd", "en");
 
+    console.log("Generando reporte para la semana:", this.selectedWeek);
+    this.isLoading = true; // Set loading state
     // Despachar la acción para generar el reporte
     this.store.dispatch(
-      PointsActions.generatePointsReport({
+      PointsActions.loadPointsData({
         startDate: formattedStartDate,
         endDate: formattedEndDate,
       })
@@ -120,6 +124,24 @@ export class PointsComponent implements OnInit {
     console.log("Generating report for the week:", formattedStartDate, "to", formattedEndDate);
   }
 
+
+  // Group reports by username
+  groupPointsByUser(points: any[]): void {
+    console.log("points", points);
+    if (!points || !Array.isArray(points) || points.length === 0) {
+      this.groupedPoints = {}; // O un valor por defecto
+      console.log("points is empy", this.groupedPoints);
+      return;
+    }
+    this.groupedPoints = points.reduce((acc, points) => {
+      const username = points.attributes?.legacy_username || "Unknown User";
+      if (!acc[username]) {
+        acc[username] = [];
+      }
+      acc[username].push(points.attributes || {});
+      return acc;
+    }, {});
+  }
 
     // Calculate the start and end of the week for the selected date
     calculateDaysOfWeek(): void {
@@ -153,5 +175,12 @@ export class PointsComponent implements OnInit {
       ];
       const date = new Date(dateString);
       return daysOfWeek[date.getDay()];
-    }   
+    }
+
+    onChangeWeek(event: Date): void {
+      this.selectedWeek = event;
+      this.calculateDaysOfWeek();
+      console.log("this.selectedWeek 1", this.selectedWeek);
+      this.fetchWeeklyData();
+    }
 }

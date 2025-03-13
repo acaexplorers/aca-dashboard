@@ -1,21 +1,26 @@
 import { createReducer, on } from "@ngrx/store";
-import { loadPointsData, loadPointsDataFailure, loadPointsDataSuccess } from "../actions/points.action";
+import * as PointsActions  from "../actions/points.action";
+import { initialReportsPoints } from "../points.state";
 
-export interface PointsState {
-  data: any[];
-  isLoading: boolean;
-  error: any;
-}
-
-export const initialState: PointsState = {
-  data: [],
-  isLoading: false,
-  error: null,
-};
 
 export const pointsReducer = createReducer(
-  initialState,
-  on(loadPointsData, (state) => ({ ...state, isLoading: true, error: null })),
-  on(loadPointsDataSuccess, (state, { data }) => ({ ...state, data, isLoading: false })),
-  on(loadPointsDataFailure, (state, { error }) => ({ ...state, error, isLoading: false }))
+  initialReportsPoints,
+
+  // Global Reports
+  on(PointsActions.loadPointsData, (state) => ({
+    ...state,
+    loadingGlobal: true,
+    errorGlobal: null,
+  })),
+    on(PointsActions.loadPointsDataSuccess, (state, { globalReports }) => ({
+      ...state,
+      globalReports,
+      loadingGlobal: false,
+    })),
+    on(PointsActions.loadPointsDataFailure, (state, { error }) => ({
+      ...state,
+      loadingGlobal: false,
+      errorGlobal: error,
+    })),
+
 );

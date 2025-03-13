@@ -29,14 +29,15 @@ export class PointsService {
    */
   getPointsData(startDate: string, endDate: string): Observable<any> {
     return this.getToken().pipe(
-      tap((token) => console.log("Token obtenido en getToken():", token)),
+      tap((token) => console.log("Token obtenido por points en getToken():", token)),
       switchMap((token) => {
         const headers = new HttpHeaders({
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         });
 
-        return this.http.get<any>(`${this.baseUrl}/points?startDate=${startDate}&endDate=${endDate}`, { headers });
+        const url = `${this.baseUrl}/scholar-reports?filters[day_reported][$gte]=${startDate}&filters[day_reported][$lte]=${endDate}`
+        return this.http.get<ApiResponse<any>>(url, { headers });
       })
     );
   }

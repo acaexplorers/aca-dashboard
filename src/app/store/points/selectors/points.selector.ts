@@ -1,16 +1,18 @@
-import { createSelector } from "@ngrx/store";
+import { createSelector, createFeatureSelector } from "@ngrx/store";
+import { ReportsPoints } from "./points.state";
 
 // Selector para obtener el estado de points
-export const selectPointsState = (state: any) => state.points;
+export const selectPointsState =  createFeatureSelector<ReportsPoints>('reports');
 
 // Selector para obtener los datos de points
 export const selectPointsData = createSelector(
   selectPointsState,
-  (state) => state.data
+  (state) => state?.globalReports ?? [] // Usa `?? []` para evitar `undefined`
 );
 
+
 // Selector para obtener el reporte generado
-export const selectPointsReport = createSelector(
+export const selectGlobalPointsReportsError = createSelector(
   selectPointsState,
-  (state) => state.report
+  (state) => state.errorGlobal
 );

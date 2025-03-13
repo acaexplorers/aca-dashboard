@@ -1,5 +1,5 @@
 import { createReducer, on } from "@ngrx/store";
-import { loadPointsData, loadPointsDataSuccess, loadPointsDataFailure } from "../actions/points.actions";
+import { loadPointsData, loadPointsDataFailure, loadPointsDataSuccess } from "../actions/points.action";
 
 export interface PointsState {
   data: any[];

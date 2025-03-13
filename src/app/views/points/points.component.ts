@@ -33,6 +33,7 @@ export interface StudentData {
   styleUrls: ["./points.component.scss"],
 })
 export class PointsComponent implements OnInit {
+  searchTerm: string = ""; // Search term for filtering
   displayedColumns: string[] = [
     "student",
     "level",
@@ -71,7 +72,7 @@ export class PointsComponent implements OnInit {
 
     this.pointsData$.subscribe({
       next: (data) => {
-        console.log("Points Data:", data);
+        console.log("pointsData:", data);
         this.isLoading = false;
         this.error = null;
         this.dataSource.data = data; // Actualizar la tabla con los datos recibidos

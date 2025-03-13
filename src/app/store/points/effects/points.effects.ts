@@ -2,22 +2,49 @@ import { Injectable } from "@angular/core";
 import { Actions, createEffect, ofType } from "@ngrx/effects";
 import { of } from "rxjs";
 import { catchError, map, mergeMap } from "rxjs/operators";
-import { PointsService } from "app/services/points.service"; // Asegúrate de que este servicio exista
-import { loadPointsData, loadPointsDataSuccess, loadPointsDataFailure } from "app/store/points/actions/points.action";
-
+import { PointsService } from "app/services/points.service"; 
+import * as PointsReportsActions from "app/store/points/actions/points.action";
 @Injectable()
 export class PointsEffects {
-  constructor(private actions$: Actions, private pointsService: PointsService) {}
+  constructor(
+    private actions$: Actions, 
+    private pointsService: PointsService // Asegúrate de que este servicio exista 
+  ) {}
 
   loadPointsData$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(loadPointsData),
+      ofType(PointsReportsActions.loadPointsData),
       mergeMap(({ startDate, endDate }) =>
         this.pointsService.getPointsData(startDate, endDate).pipe(
-          map((data) => loadPointsDataSuccess({ data })),
-          catchError((error) => of(loadPointsDataFailure({ error })))
+          map((data) => 
+            PointsReportsActions.loadPointsDataSuccess({ data })
+        ),
+          catchError(
+            (error) => of(PointsReportsActions.loadPointsDataFailure({ error }))
+          )
         )
       )
     )
   );
+
+  loadWeeklyPoints$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(PointsReportsActions.loadWeeklyPoints),
+      mergeMap(({ startDate, endDate, username }) =>
+        this.pointsService
+          .getWeeklyPointsReports(startDate, endDate, username)
+          .pipe(
+            map((weeklyReports) =>
+              PointsReportsActions.loadWeeklyPointsSuccess({ weeklyReports })
+            ),
+            catchError((error) =>
+              of(PointsReportsActions.loadWeeklyPointsFailure({ error }))
+            )
+          )
+      )
+    )
+  );
+
+  
+  
 }

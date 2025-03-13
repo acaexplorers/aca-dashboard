@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Store, select } from "@ngrx/store";
 import { Observable } from "rxjs";
-import { map, switchMap, take } from "rxjs/operators";
+import { map, switchMap, take, tap } from "rxjs/operators";
 import { selectAuthToken } from "app/store/auth/selectors/auth.selectors";
 import { environment } from "../../environments/environment";
 import { ApiResponse } from "app/utils/types";
@@ -19,6 +19,7 @@ export class ReportsService {
    * Get token from the store using the selector.
    */
   private getToken(): Observable<string> {
+    console.log('getToken()');
     return this.store.pipe(select(selectAuthToken), take(1));
   }
 
@@ -29,6 +30,7 @@ export class ReportsService {
    */
   getUsersReports(startDate: string, endDate: string): Observable<any> {
     return this.getToken().pipe(
+      //tap((token) => console.log("Token obtenido en getToken():", token)),
       switchMap((token) => {
         const headers = new HttpHeaders({
           "Content-Type": "application/json",

@@ -34,6 +34,7 @@ export interface StudentData {
 })
 export class PointsComponent implements OnInit {
   searchTerm: string = ""; // Search term for filtering
+  filteredPoints: any[] = []; // Filtered points for table view
   displayedColumns: string[] = [
     "student",
     "level",
@@ -57,7 +58,7 @@ export class PointsComponent implements OnInit {
   ];
   daysOfWeek: Date[] = []; // Days in the selected week
   selectedWeek: Date = new Date(); // Semana seleccionada
-  dataSource = new MatTableDataSource<StudentData>(); // Usamos un MatTableDataSource vacío
+  //dataSource = new MatTableDataSource<StudentData>(); // Usamos un MatTableDataSource vacío
   pointsData$: Observable<any>; // Observable para los datos de puntos
   groupedPoints: any = {}; // Grouped points by username
   isLoading: boolean = false; // Indicador de carga
@@ -70,21 +71,24 @@ export class PointsComponent implements OnInit {
     this.pointsData$ = this.store.select(selectPointsData);
 
     this.fetchWeeklyData(); 
-    console.log("this.pointsData$ 1", this.pointsData$);
 
     this.pointsData$.subscribe({
-      next: (points) => {
-        console.log("points", points);
-        this.isLoading = false;
-        this.error = null;
-        this.groupPointsByUser(points.data); // Agrupar los puntos por usuario
-      },
-      error: (err) => {
-        this.isLoading = false;
-        this.error = "Failed to fetch points data. Please try again.";
-        console.error("Error fetching points data:", err);
-      },
-    });
+  next: (points) => {
+    console.log("points", points); // Asegúrate de que hay datos aquí
+    if (!points || !points.data || points.data.length === 0) {
+      console.error("points.data está vacío o es undefined");
+    } else {
+      this.groupPointsByUser(points.data);
+      this.updateFilteredData();
+    }
+    this.isLoading = false;
+  },
+  error: (err) => {
+    this.isLoading = false;
+    this.error = "Failed to fetch points data. Please try again.";
+    console.error("Error fetching points data:", err);
+  },
+});
 
     this.calculateDaysOfWeek();
   }
@@ -102,7 +106,40 @@ export class PointsComponent implements OnInit {
         endDate: formattedEndDate,
       })
     );
-    console.log("Selected week fetc pots:", this.selectedWeek);      
+  }
+
+  // Update filtered data based on the view mode
+  updateFilteredData(): void {
+    this.filteredPoints = this.prepareTablePointsData();
+  }
+  
+  // Prepare table data dynamically
+  prepareTablePointsData(): any[] {
+    const allRows = [];
+    Object.keys(this.groupedPoints).forEach((username) => {
+      this.groupedPoints[username].forEach((day: any) => {
+        allRows.push({
+          student: username|| "N/A", //**** */  name
+          level: day.level || "N/A", //**** */  level
+          habitAction: day.day_reported|| "N/A", //**** */ day_reported
+          points: day.day_reported|| "N/A", //**** */ day_reported
+          totalPoints: day.studied|| "N/A", //**** */ 
+          contributed: "N/A",
+          added: day.added|| "N/A", //**** */ 
+          status: "N/A", //day.status || "N/A",
+          studyRate: "N/A", //day.study_rate || "N/A",
+          daysStudied: "N/A", //day.days_studied || "N/A",
+          streak: "N/A", //day.streak || "N/A",
+          max:"N/A", // day.max || "N/A",
+          maxLevel: "N/A", //day.max_level || "N/A",
+          activeDays:"N/A", // day.active_days || "N/A",
+          addedStreak:"N/A", // day.added_streak || "N/A",
+          activeStreak: "N/A", //day.active_streak || "N/A",
+          activeDaysStreak: "N/A", //day.active_days_streak || "N/A"          
+        });
+      });
+    });
+    return allRows;
   }
 
   generateReport(): void {
@@ -133,15 +170,18 @@ export class PointsComponent implements OnInit {
       console.log("points is empy", this.groupedPoints);
       return;
     }
-    this.groupedPoints = points.reduce((acc, points) => {
-      const username = points.attributes?.legacy_username || "Unknown User";
+    console.log("reports aqui groupPointsByUser", points);
+    this.groupedPoints = points.reduce((acc, point) => {
+      const username = point.attributes?.legacy_username || "Unknown User";
       if (!acc[username]) {
         acc[username] = [];
       }
-      acc[username].push(points.attributes || {});
+      console.log("point , acc", point, acc);
+      acc[username].push(point.attributes || {});
       return acc;
     }, {});
   }
+
 
     // Calculate the start and end of the week for the selected date
     calculateDaysOfWeek(): void {

@@ -1,31 +1,9 @@
 import { Component, OnInit } from "@angular/core";
-import { MatTableDataSource } from "@angular/material/table";
 import { Store } from "@ngrx/store";
 import { Observable } from "rxjs";
 import { selectPointsData } from "app/store/points/points.selector"; // Asegúrate de que esta ruta sea correcta
 import * as PointsActions from "app/store/points/actions/points.action"; // Asegúrate de que esta ruta sea correcta
 import { formatDate } from "@angular/common";
-
-export interface StudentData {
-  student: string;
-  level: number;
-  habitAction: number;
-  points: number;
-  totalPoints: number;
-  contributed: string;
-  added: number;
-  status: string;
-  studyRate: number;
-  daysStudied: number;
-  streak: number;
-  studied: number;
-  max: number;
-  maxLevel: number;
-  activeDays: number;
-  addedStreak: number;
-  activeStreak: number;
-  activeDaysStreak: string;
-  }
 
 @Component({
   selector: "app-points",
@@ -58,7 +36,6 @@ export class PointsComponent implements OnInit {
   ];
   daysOfWeek: Date[] = []; // Days in the selected week
   selectedWeek: Date = new Date(); // Semana seleccionada
-  //dataSource = new MatTableDataSource<StudentData>(); // Usamos un MatTableDataSource vacío
   pointsData$: Observable<any>; // Observable para los datos de puntos
   groupedPoints: any = {}; // Grouped points by username
   isLoading: boolean = false; // Indicador de carga

@@ -104,15 +104,15 @@ export class PointsComponent implements OnInit {
           contributed: "N/A",
           added: day.added|| "N/A", //**** */ 
           status: "N/A", //day.status || "N/A",
-          studyRate: "N/A", //day.study_rate || "N/A",
+          studyRate: day.study_streak || "N/A", //day.study_rate || "N/A",
           daysStudied: "N/A", //day.days_studied || "N/A",
-          streak: "N/A", //day.streak || "N/A",
+          streak: day.active_streak || "N/A", //day.streak || "N/A",
           max:"N/A", // day.max || "N/A",
           maxLevel: "N/A", //day.max_level || "N/A",
-          activeDays:"N/A", // day.active_days || "N/A",
-          addedStreak:"N/A", // day.added_streak || "N/A",
-          activeStreak: "N/A", //day.active_streak || "N/A",
-          activeDaysStreak: "N/A", //day.active_days_streak || "N/A"          
+          activeDays:day.active_days_streak || "N/A", // day.active_days || "N/A", probablemente sobra.
+          addedStreak:day.added_streak || "N/A", // day.added_streak || "N/A",
+          activeStreak:day.active_streak || "N/A", //day.active_streak || "N/A", probablemente sobra.
+          activeDaysStreak: day.active_days_streak || "N/A", //day.active_days_streak || "N/A"          
         });
       });
     });

@@ -35,8 +35,10 @@ export class PointsService {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         });
-
-        const url = `${this.baseUrl}/scholar-reports?filters[day_reported][$gte]=${startDate}&filters[day_reported][$lte]=${endDate}`
+        // validacion inicial con filtros predeterminados
+        //student-streak-history?page=1&pageSize=10&sort=legacy_username:ASC
+        //const url = `${this.baseUrl}/scholar-reports?filters[day_reported][$gte]=${startDate}&filters[day_reported][$lte]=${endDate}`
+        const url = `${this.baseUrl}/student-streak-histories`;
         return this.http.get<ApiResponse<any>>(url, { headers });
       })
     );
@@ -46,7 +48,7 @@ export class PointsService {
    * Send a report (upsert operation).
    * @param report Report data
    */
-  sendReport(report: any): Observable<any> {
+  sendReportPoints(report: any): Observable<any> {
     return this.getToken().pipe(
       switchMap((token) => {
         const headers = new HttpHeaders({
@@ -54,7 +56,7 @@ export class PointsService {
           Authorization: `Bearer ${token}`,
         });
 
-        const url = `${this.baseUrl}/scholar-reports/upsert`;
+        const url = `${this.baseUrl}/student-streak-histories`;
         return this.http.post(url, report, { headers });
       })
     );
@@ -79,7 +81,7 @@ export class PointsService {
           Authorization: `Bearer ${token}`,
         });
   
-        const url = `${this.baseUrl}/scholar-reports?filters[day_reported][$gte]=${startDate}&filters[day_reported][$lte]=${endDate}&filters[legacy_username]=${username}`;
+        const url = `${this.baseUrl}/student-streak-histories`;
         return this.http.get<ApiResponse<any>>(url, { headers }).pipe(
           map((response) => response.data)
         );

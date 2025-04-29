@@ -15,10 +15,10 @@ export class PointsEffects {
     this.actions$.pipe(
       ofType(PointsReportsActions.loadPointsData),
       tap(({ startDate, endDate }) => 
-        console.log("✅ Effect disparado - loadPointsData", startDate, endDate)),      
+        console.log("Effect disparado - loadPointsData", startDate, endDate)),      
       mergeMap(({ startDate, endDate }) =>
         this.pointsService.getPointsData(startDate, endDate).pipe(
-          tap((globalReports) => console.log("📊 Datos recibidos:", globalReports)),
+          tap((globalReports) => console.log("Datos recibidos:", globalReports)),
           map((globalReports) => PointsReportsActions.loadPointsDataSuccess({ globalReports })),
           catchError(
             (error) => of(PointsReportsActions.loadPointsDataFailure({ error }))

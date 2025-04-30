@@ -7,6 +7,12 @@ import { selectAuthToken } from "app/store/auth/selectors/auth.selectors";
 import { Store, select } from "@ngrx/store";
 import { ApiResponse } from "app/utils/types";
 
+export interface QueryParams {
+  startDate?: string;
+  endDate?: string;
+  page?: number;
+  pageSize?: number;
+}
 @Injectable({
   providedIn: "root",
 })
@@ -27,8 +33,9 @@ export class PointsService {
    * @param startDate Start date (YYYY-MM-DD)
    * @param endDate End date (YYYY-MM-DD)
    */
-  getPointsData(startDate: string, endDate: string): Observable<any> {
-  //getPointsData(startDate: string, endDate: string, page: int, pageSize: int): Observable<any> {
+  //getPointsData(startDate: string, endDate: string): Observable<any> {
+  getPointsData( params: QueryParams ): Observable<any> {
+    const { startDate, endDate, page = 1, pageSize = 50 } = params;
     console.log("Fecha inicio (startDate):", startDate);
     console.log("Fecha fin (endDate):", endDate);
     return this.getToken().pipe(
@@ -37,9 +44,28 @@ export class PointsService {
         const headers = new HttpHeaders({
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
-        });
-        //const url = `${this.baseUrl}/student-streak-histories?pagination[page]=1&pagination[pageSize]=50&sort=legacy_username:ASC&filters[$and][0][week_start_date][$gte]=${startDate}&filters[$and][1][week_end_date][$lte]=${endDate}`;
-        const url = `${this.baseUrl}/student-streak-histories?pagination[page]=1&pagination[pageSize]=50&sort=legacy_username:ASC&filters[$and][0][week_start_date][$gte]=${startDate}`;
+        });      
+
+        let queryString = `pagination[page]=${page}&pagination[pageSize]=${pageSize}&sort=legacy_username:ASC`;
+
+        const filters: string[] = [];
+
+        if (startDate) {
+          filters.push(`filters[$and][0][week_start_date][$gte]=${startDate}`);
+        }
+  
+        if (endDate) {
+          //filters.push(`filters[$and][1][week_end_date][$lte]=${endDate}`);
+        }
+        
+  
+        if (filters.length > 0) {
+          queryString += `&${filters.join("&")}`;
+        }
+
+        //const url = `${this.baseUrl}/student-streak-histories?pagination[page]=${page}&pagination[pageSize]=${pageSize}&sort=legacy_username:ASC&filters[$and][0][week_start_date][$gte]=${startDate}&filters[$and][1][week_end_date][$lte]=${endDate}`;
+        //const url = `${this.baseUrl}/student-streak-histories?pagination[page]=${page}&pagination[pageSize]=${pageSize}&sort=legacy_username:ASC&filters[$and][0][week_start_date][$gte]=${startDate}`;
+        const url = `${this.baseUrl}/student-streak-histories?${queryString}`;
         return this.http.get<ApiResponse<any>>(url, { headers });
       })
     );

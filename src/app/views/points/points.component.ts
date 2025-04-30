@@ -11,6 +11,9 @@ import { formatDate } from "@angular/common";
   styleUrls: ["./points.component.scss"],
 })
 export class PointsComponent implements OnInit {
+onPageChange($event: any) {
+throw new Error('Method not implemented.');
+}
   searchTerm: string = ""; // Search term for filtering
   filteredPoints: any[] = []; // Filtered points for table view
   displayedColumns: string[] = [
@@ -85,6 +88,27 @@ export class PointsComponent implements OnInit {
     );
   }
 
+
+  generateReport(): void {
+    const startOfWeek = this.getStartOfWeek(this.selectedWeek);
+    const endOfWeek = this.getEndOfWeek(this.selectedWeek);
+    const formattedStartDate = formatDate(startOfWeek, "yyyy-MM-dd", "en");
+    const formattedEndDate = formatDate(endOfWeek, "yyyy-MM-dd", "en");
+
+    console.log("Generando reporte para la semana:", this.selectedWeek);
+    this.isLoading = true; // Set loading state
+    // Despachar la acción para generar el reporte
+    this.store.dispatch(
+      PointsActions.loadPointsData({
+        startDate: formattedStartDate,
+        endDate: formattedEndDate,
+      })
+    );
+
+    console.log("Generating report for the week:", formattedStartDate, "to", formattedEndDate);
+  }
+
+
   // Update filtered data based on the view mode
   updateFilteredData(): void {
     this.filteredPoints = this.prepareTablePointsData();
@@ -117,25 +141,6 @@ export class PointsComponent implements OnInit {
       });
     });
     return allRows;
-  }
-
-  generateReport(): void {
-    const startOfWeek = this.getStartOfWeek(this.selectedWeek);
-    const endOfWeek = this.getEndOfWeek(this.selectedWeek);
-    const formattedStartDate = formatDate(startOfWeek, "yyyy-MM-dd", "en");
-    const formattedEndDate = formatDate(endOfWeek, "yyyy-MM-dd", "en");
-
-    console.log("Generando reporte para la semana:", this.selectedWeek);
-    this.isLoading = true; // Set loading state
-    // Despachar la acción para generar el reporte
-    this.store.dispatch(
-      PointsActions.loadPointsData({
-        startDate: formattedStartDate,
-        endDate: formattedEndDate,
-      })
-    );
-
-    console.log("Generating report for the week:", formattedStartDate, "to", formattedEndDate);
   }
 
 
@@ -194,10 +199,15 @@ export class PointsComponent implements OnInit {
       return daysOfWeek[date.getDay()];
     }
 
-    onChangeWeek(event: Date): void {
+    onChangeWeekStart(event: Date): void {
       this.selectedWeek = event;
       this.calculateDaysOfWeek();
       console.log("this.selectedWeek 1", this.selectedWeek);
+      this.fetchWeeklyData();
+    }
+
+    onSelectPageSize(event: any): void {
+      console.log("onSelectPageSize", event);
       this.fetchWeeklyData();
     }
 }

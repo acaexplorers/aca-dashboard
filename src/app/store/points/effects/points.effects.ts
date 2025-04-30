@@ -14,17 +14,17 @@ export class PointsEffects {
   loadPointsData$ = createEffect(() =>
     this.actions$.pipe(
       ofType(PointsReportsActions.loadPointsData),
-      tap(({ startDate, endDate }) => 
-        console.log("Effect disparado - loadPointsData", startDate, endDate)),      
-      mergeMap(({ startDate, endDate }) =>
-        this.pointsService.getPointsData(startDate, endDate).pipe(
+      tap(({ startDate, endDate, page, pageSize }) =>         
+        console.log("Effect disparado - loadPointsData", startDate, endDate, page, pageSize)
+    ), 
+      mergeMap(({ startDate, endDate, page, pageSize }) => {
+        const params = { startDate, endDate, page, pageSize };
+        return this.pointsService.getPointsData(params).pipe(
           tap((globalReports) => console.log("Datos recibidos:", globalReports)),
           map((globalReports) => PointsReportsActions.loadPointsDataSuccess({ globalReports })),
-          catchError(
-            (error) => of(PointsReportsActions.loadPointsDataFailure({ error }))
-          )
-        )
-      )
+          catchError((error) => of(PointsReportsActions.loadPointsDataFailure({ error })))
+        );
+      })
     )
   );
 

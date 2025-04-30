@@ -2,7 +2,7 @@ import { createAction, props } from "@ngrx/store";
 
 export const loadPointsData = createAction(   // Acción para cargar los datos de puntos
   "[Points] Load Points Data",
-  props<{ startDate: string; endDate: string }>()  
+  props<{ startDate?: string; endDate?: string;  page?:number ; pageSize?:number }>()  
 );
 console.log("Disparando acción loadPointsData");
 

@@ -206,6 +206,13 @@ throw new Error('Method not implemented.');
       this.fetchWeeklyData();
     }
 
+    onChangeWeekEnd(event: Date): void {
+      this.selectedWeek = event;
+      this.calculateDaysOfWeek();
+      console.log("this.selectedWeek 1", this.selectedWeek);
+      this.fetchWeeklyData();
+    }
+
     pageSize: number = 50;
 
     onPageSizeChange(event: any): void {

@@ -1,16 +1,32 @@
 <div class="points-container">
   <!-- Date Picker for Week Selection -->
-  <mat-form-field class="date-input">
-    <mat-label>Select Week Starting Day</mat-label>
-    <input
-      matInput
-      [matDatepicker]="picker"
-      (dateChange)="onChangeWeekStart($event.value)"
-    />
-    <mat-hint>MM/DD/YYYY</mat-hint>
-    <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-    <mat-datepicker #picker></mat-datepicker>
-  </mat-form-field>
+   
+  <div class="row" style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
+    <mat-form-field class="date-input-start">
+      <mat-label>Select Week Starting Day</mat-label>
+      <input
+        matInput
+        [matDatepicker]="picker"
+        (dateChange)="onChangeWeekStart($event.value)"
+      />
+      <mat-hint>MM/DD/YYYY</mat-hint>
+      <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field class="date-input-end">
+      <mat-label>Select Week End Day</mat-label>
+      <input
+        matInput
+        [matDatepicker]="picker"
+        (dateChange)="onChangeWeekEnd($event.value)"
+      />
+      <mat-hint>MM/DD/YYYY</mat-hint>
+      <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+
+  </div>
 
   <!-- Botón de búsqueda -->
   <button mat-flat-button color="primary" (click)="fetchWeeklyData()" style="margin-left: 10px;">

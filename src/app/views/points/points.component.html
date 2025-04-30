@@ -128,15 +128,18 @@
     <!-- Data Row -->
     <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
   </table>
+  
 
-  <mat-form-field appearance="fill" class="page-size-dropdown">
-    <mat-label>Items per page</mat-label>
-    <mat-select [value]="pageSize" (selectionChange)="onPageSizeChange($event.value)">
-      <mat-option *ngFor="let size of [10, 20, 50, 100]" [value]="size">
-        {{ size }}
-      </mat-option>
-    </mat-select>
-  </mat-form-field>  
+  <div class="row" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+    <!-- Dropdown de tamaño de página -->
+    <mat-form-field appearance="fill" class="page-size-dropdown">
+      <mat-label>Items per page</mat-label>
+      <mat-select [value]="pageSize" (selectionChange)="onPageSizeChange($event.value)">
+        <mat-option *ngFor="let size of [10, 20, 50, 100]" [value]="size">
+          {{ size }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
   
     <!-- Selector de paginación estilo < 1 2 3 ... n > -->
     <div class="pagination-controls">

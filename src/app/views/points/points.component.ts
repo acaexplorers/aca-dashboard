@@ -206,8 +206,25 @@ throw new Error('Method not implemented.');
       this.fetchWeeklyData();
     }
 
-    onSelectPageSize(event: any): void {
+    pageSize: number = 50;
+
+    onPageSizeChange(event: any): void {
       console.log("onSelectPageSize", event);
       this.fetchWeeklyData();
     }
+    
+    currentPage = 1;
+    totalPages = 10;
+
+    get totalPagesArray(): number[] {
+      return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+    }
+
+    
+    goToPage(page: number): void {
+      if (page >= 1 && page <= this.totalPages) {
+        this.currentPage = page;
+        //this.fetchData(); // carga datos de la nueva página
+      }
+}
 }

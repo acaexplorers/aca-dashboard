@@ -28,17 +28,18 @@ export class PointsService {
    * @param endDate End date (YYYY-MM-DD)
    */
   getPointsData(startDate: string, endDate: string): Observable<any> {
+  //getPointsData(startDate: string, endDate: string, page: int, pageSize: int): Observable<any> {
+    console.log("Fecha inicio (startDate):", startDate);
+    console.log("Fecha fin (endDate):", endDate);
     return this.getToken().pipe(
-      tap((token) => console.log("Token obtenido por points en getToken():", token)),
+      tap((token) => console.log("Token obtenido por points en getToken():", token)), 
       switchMap((token) => {
         const headers = new HttpHeaders({
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         });
-        // validacion inicial con filtros predeterminados
-        //student-streak-history?page=1&pageSize=10&sort=legacy_username:ASC
-        //const url = `${this.baseUrl}/scholar-reports?filters[day_reported][$gte]=${startDate}&filters[day_reported][$lte]=${endDate}`
-        const url = `${this.baseUrl}/student-streak-histories`;
+        //const url = `${this.baseUrl}/student-streak-histories?pagination[page]=1&pagination[pageSize]=50&sort=legacy_username:ASC&filters[$and][0][week_start_date][$gte]=${startDate}&filters[$and][1][week_end_date][$lte]=${endDate}`;
+        const url = `${this.baseUrl}/student-streak-histories?pagination[page]=1&pagination[pageSize]=50&sort=legacy_username:ASC&filters[$and][0][week_start_date][$gte]=${startDate}`;
         return this.http.get<ApiResponse<any>>(url, { headers });
       })
     );
@@ -80,8 +81,8 @@ export class PointsService {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         });
-  
-        const url = `${this.baseUrl}/student-streak-histories`;
+        
+        const url = `${this.baseUrl}/student-streak-histories?filters[$and][0][week_start_date][$gt]=${startDate}&filters[$and][1][week_end_date][$lt]=${endDate}&sort=legacy_username:ASC`;
         return this.http.get<ApiResponse<any>>(url, { headers }).pipe(
           map((response) => response.data)
         );

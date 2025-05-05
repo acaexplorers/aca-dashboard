@@ -1,110 +1,124 @@
 <div class="points-container">
-  <div class="search-bar">
-    <mat-form-field>
-      <mat-label>Search</mat-label>
-      <input
-        matInput
-        (keyup)="applyFilter($event)"
-        placeholder="Search for students..."
-      />
-    </mat-form-field>
-  </div>
+  <!-- Date Picker for Week Selection -->
+  <mat-form-field class="date-input">
+    <mat-label>Select Week Starting Day</mat-label>
+    <input
+      matInput
+      [matDatepicker]="picker"
+      (dateChange)="onChangeWeek($event.value)"
+    />
+    <mat-hint>MM/DD/YYYY</mat-hint>
+    <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-datepicker #picker></mat-datepicker>
+  </mat-form-field>
 
-  <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+  <!-- Botón de búsqueda -->
+  <button mat-flat-button color="primary" (click)="fetchWeeklyData()" style="margin-left: 10px;">
+    Buscar
+  </button>
+
+
+  <!-- Tabla de datos -->
+  <table mat-table [dataSource]="filteredPoints" class="mat-elevation-z8">
+    <!-- Columnas de la tabla -->
+     
     <ng-container matColumnDef="student">
       <th mat-header-cell *matHeaderCellDef>Student</th>
-      <td mat-cell *matCellDef="let element">{{ element.student }}</td>
+      <td mat-cell *matCellDef="let pointsData">{{ pointsData.student }}</td>
     </ng-container>
 
     <ng-container matColumnDef="level">
       <th mat-header-cell *matHeaderCellDef>Level</th>
-      <td mat-cell *matCellDef="let element">{{ element.level }}</td>
+      <td mat-cell *matCellDef="let pointsData">{{ pointsData.level }}</td>
     </ng-container>
 
     <ng-container matColumnDef="habitAction">
       <th mat-header-cell *matHeaderCellDef>Habit Action</th>
-      <td mat-cell *matCellDef="let element">{{ element.habitAction }}</td>
+      <!-- <td mat-cell *matCellDef="let pointsData">{{ pointsData.habitAction }}</td> -->
+      <td mat-cell *matCellDef="let pointsData">{{ pointsData.habitAction }}</td> <!-- Eliminar despues -->
     </ng-container>
 
     <ng-container matColumnDef="points">
       <th mat-header-cell *matHeaderCellDef>Points</th>
-      <td mat-cell *matCellDef="let element">{{ element.points }}</td>
+      <!-- <td mat-cell *matCellDef="let pointsData">{{ pointsData.points }}</td> -->
+      <td mat-cell *matCellDef="let pointsData">{{ pointsData.points }}</td> <!-- Eliminar despues -->
     </ng-container>
 
     <ng-container matColumnDef="totalPoints">
       <th mat-header-cell *matHeaderCellDef>Total Points</th>
-      <td mat-cell *matCellDef="let element">{{ element.totalPoints }}</td>
+      <!-- <td mat-cell *matCellDef="let pointsData">{{ pointsData.totalPoints }}</td> -->
+      <td mat-cell *matCellDef="let pointsData">{{ pointsData.totalPoints }}</td> <!-- Eliminar despues -->
     </ng-container>
 
     <ng-container matColumnDef="contributed">
       <th mat-header-cell *matHeaderCellDef>% Contributed</th>
-      <td mat-cell *matCellDef="let element">{{ element.contributed }}</td>
+      <td mat-cell *matCellDef="let pointsData">{{ pointsData.contributed }}</td>
     </ng-container>
 
     <ng-container matColumnDef="added">
       <th mat-header-cell *matHeaderCellDef>Added</th>
-      <td mat-cell *matCellDef="let element">{{ element.added }}</td>
+      <td mat-cell *matCellDef="let pointsData">{{ pointsData.added }}</td>
     </ng-container>
 
     <ng-container matColumnDef="status">
       <th mat-header-cell *matHeaderCellDef>Status</th>
-      <td mat-cell *matCellDef="let element">{{ element.status }}</td>
+      <td mat-cell *matCellDef="let pointsData">{{ pointsData.status }}</td>
     </ng-container>
 
     <ng-container matColumnDef="studyRate">
       <th mat-header-cell *matHeaderCellDef>Study Rate</th>
-      <td mat-cell *matCellDef="let element">{{ element.studyRate }}</td>
+      <td mat-cell *matCellDef="let pointsData">{{ pointsData.studyRate }}</td>
     </ng-container>
 
     <ng-container matColumnDef="daysStudied">
       <th mat-header-cell *matHeaderCellDef>Days Studied</th>
-      <td mat-cell *matCellDef="let element">{{ element.daysStudied }}</td>
+      <td mat-cell *matCellDef="let pointsData">{{ pointsData.daysStudied }}</td>
     </ng-container>
 
     <ng-container matColumnDef="streak">
       <th mat-header-cell *matHeaderCellDef>Streak</th>
-      <td mat-cell *matCellDef="let element">{{ element.streak }}</td>
+      <td mat-cell *matCellDef="let pointsData">{{ pointsData.streak }}</td>
     </ng-container>
 
     <ng-container matColumnDef="studied">
       <th mat-header-cell *matHeaderCellDef>Studied</th>
-      <td mat-cell *matCellDef="let element">{{ element.studied }}</td>
+      <td mat-cell *matCellDef="let pointsData">{{ pointsData.studied }}</td>
     </ng-container>
 
     <ng-container matColumnDef="max">
       <th mat-header-cell *matHeaderCellDef>Max</th>
-      <td mat-cell *matCellDef="let element">{{ element.max }}</td>
+      <td mat-cell *matCellDef="let pointsData">{{ pointsData.max }}</td>
     </ng-container>
 
     <ng-container matColumnDef="maxLevel">
       <th mat-header-cell *matHeaderCellDef>Max Level</th>
-      <td mat-cell *matCellDef="let element">{{ element.maxLevel }}</td>
+      <td mat-cell *matCellDef="let pointsData">{{ pointsData.maxLevel }}</td>
     </ng-container>
 
     <ng-container matColumnDef="activeDays">
       <th mat-header-cell *matHeaderCellDef>Active Days</th>
-      <td mat-cell *matCellDef="let element">{{ element.activeDays }}</td>
+      <td mat-cell *matCellDef="let pointsData">{{ pointsData.activeDays }}</td>
     </ng-container>
 
     <ng-container matColumnDef="addedStreak">
       <th mat-header-cell *matHeaderCellDef>Added Streak</th>
-      <td mat-cell *matCellDef="let element">{{ element.addedStreak }}</td>
+      <td mat-cell *matCellDef="let pointsData">{{ pointsData.addedStreak }}</td>
     </ng-container>
 
     <ng-container matColumnDef="activeStreak">
       <th mat-header-cell *matHeaderCellDef>Active Streak</th>
-      <td mat-cell *matCellDef="let element">{{ element.activeStreak }}</td>
+      <td mat-cell *matCellDef="let pointsData">{{ pointsData.activeStreak }}</td>
     </ng-container>
 
     <ng-container matColumnDef="activeDaysStreak">
       <th mat-header-cell *matHeaderCellDef>Active Days Streak</th>
-      <td mat-cell *matCellDef="let element">{{ element.activeDaysStreak }}</td>
+      <td mat-cell *matCellDef="let pointsData">{{ pointsData.activeDaysStreak }}</td>
     </ng-container>
 
     <ng-container matColumnDef="action">
       <th mat-header-cell *matHeaderCellDef>Action</th>
-      <td mat-cell *matCellDef="let element">
-        <button mat-button class="generate-button">GENERATE</button>
+      <td mat-cell *matCellDef="let pointsData">
+        <button mat-button class="generate-button" (click)="generateReport()">GENERATE</button>
       </td>
     </ng-container>
 
@@ -114,4 +128,4 @@
     <!-- Data Row -->
     <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
   </table>
-</div>
+ 

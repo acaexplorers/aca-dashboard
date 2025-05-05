@@ -38,7 +38,7 @@ export class StatsComponent implements OnInit {
 
     // Fetch reports for the current week
     this.fetchReports();
-
+    console.log("this.userReports$ 1", this.userReports$);
     // Subscribe to userReports$ and process the data
     this.userReports$.subscribe({
       next: (reports) => {
@@ -65,7 +65,7 @@ export class StatsComponent implements OnInit {
     const endOfWeek = this.getEndOfWeek(this.selectedWeek);
     const formattedStartDate = formatDate(startOfWeek, "yyyy-MM-dd", "en");
     const formattedEndDate = formatDate(endOfWeek, "yyyy-MM-dd", "en");
-
+    console.log("formattedStartDate 2", formattedStartDate);
     this.isLoading = true; // Set loading state
     this.store.dispatch(
       ReportsActions.loadGlobalReports({
@@ -202,6 +202,7 @@ export class StatsComponent implements OnInit {
   onWeekChange(event: Date): void {
     this.selectedWeek = event;
     this.calculateDaysOfWeek();
+    console.log("this.selectedWeek 1", this.selectedWeek);
     this.fetchReports();
   }
 }

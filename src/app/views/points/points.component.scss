@@ -1,5 +1,30 @@
+.points-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  h2 {
+    color: #3f51b5;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+}
+
+.date-selection-container {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+
+  mat-form-field {
+    flex: 1;
+    min-width: 250px;
+  }
+}
+
 .mat-header-row {
-  background-color: #3f51b5; /* Dark blue color */
+  background-color: #3f51b5;
   color: white;
 }
 
@@ -29,17 +54,74 @@
   margin-bottom: 20px;
 }
 
-.points-container {
-    padding: 15px;
-}
-
 .date-input {
   margin-bottom: 20px;
 }
 
-/* Estilo para el botón de búsqueda */
 .search-button {
-  margin-left: 10px;
-  background-color: #4caf50; /* Green color */
-  color: white;
+  height: 56px;
+  margin-bottom: 16px;
+}
+
+.pagination-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.page-size-selector {
+  width: 120px;
+  margin-bottom: 20px;
+  align-self: flex-start;
+}
+
+.pagination-controls {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+
+  button {
+    min-width: 36px;
+    padding: 0 8px;
+    line-height: 36px;
+  }
+
+  span {
+    padding: 0 8px;
+  }
+}
+
+.page-info {
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #666;
+}
+
+.search-container {
+  margin: 20px 0;
+  display: flex;
+  justify-content: flex-end;
+
+  .search-field {
+    width: 300px;
+    
+    mat-icon {
+      color: rgba(0, 0, 0, 0.54);
+      cursor: pointer;
+      
+      &:hover {
+        color: #3f51b5;
+      }
+    }
+  }
+
+  .no-data-row {
+    text-align: center;
+    padding: 20px;
+    font-style: italic;
+    color: #888;
+  }
 }

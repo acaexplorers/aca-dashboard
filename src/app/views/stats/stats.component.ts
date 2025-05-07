@@ -11,6 +11,10 @@ import { formatDate } from "@angular/common";
   styleUrls: ["./stats.component.scss"],
 })
 export class StatsComponent implements OnInit {
+currentPage: any;
+goToPage(arg0: number) {
+throw new Error('Method not implemented.');
+}
   viewMode: string = "cards"; // Default to card view
   filteredStudents: any[] = []; // Filtered students for table view
   filteredCardStudents: any[] = []; // Filtered students for card view

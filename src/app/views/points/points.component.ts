@@ -90,9 +90,7 @@ export class PointsComponent implements OnInit {
     "activeStreak",
     "activeDaysStreak",
     "action",
-  ];
-
-  
+  ];  
   pageSize = 10;
   currentPage = 1;
   totalItems = 0;
@@ -123,15 +121,12 @@ export class PointsComponent implements OnInit {
     this.initializeData();
     this.setupDateRange();
     this.fetchCombinedData();
-  
 
     this.pointsData$ = this.store.select(selectPointsData);
     this.globalReports$ = this.store.select(selectGlobalReports);
     
-    // Suscripciones para debug
     this.pointsData$.subscribe(data => console.log('Datos de puntos:', data));
     this.globalReports$.subscribe(data => console.log('Datos de reports:', data));
-    
     this.fetchCombinedData();
   }
 
@@ -150,7 +145,6 @@ export class PointsComponent implements OnInit {
     if (!dateString) return false;
 
     try {
-      // Normalizar fecha (eliminar hora/minutos/segundos)
       const inputDate = new Date(dateString);
       inputDate.setHours(0, 0, 0, 0);
       
@@ -169,19 +163,18 @@ export class PointsComponent implements OnInit {
 
   startDateFilter = (date: Date | null): boolean => {
     if (!date) return false;
-    return date.getDay() === 3; // 3 = miércoles
+    return date.getDay() === 3; 
   }
 
   endDateFilter = (date: Date | null): boolean => {
     if (!date) return false;
-    return date.getDay() === 2; // 2 = martes
+    return date.getDay() === 2; 
   }
 
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
   }
 
-  // Métodos de filtrado
   applyFilter(): void {
     const filterValue = this.searchTerm.trim().toLowerCase();
     this.dataSource.filter = filterValue;
@@ -191,7 +184,6 @@ export class PointsComponent implements OnInit {
     }
   }
 
-  // Métodos para actualizar datos
   updateDataSource(): void {
     const tableData = this.prepareTablePointsData();
     console.log('Datos preparados para tabla:', tableData);
@@ -211,7 +203,6 @@ export class PointsComponent implements OnInit {
     
     this.dataSource = new MatTableDataSource<TableRow>(tableData);
   
-     // Configurar paginador si existe
     if (this.paginator) {
       this.dataSource.paginator = this.paginator;
     }
@@ -219,7 +210,6 @@ export class PointsComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
-  // Métodos para obtener y procesar datos
   fetchCombinedData(): void {
     this.isLoading = true;
     
@@ -233,19 +223,19 @@ export class PointsComponent implements OnInit {
 
     forkJoin({
       pointsData: this.pointsData$.pipe(
-        filter(data => !!data?.data), // Filtramos datos nulos
-        take(1), // Tomamos solo la primera emisión válida
+        filter(data => !!data?.data), 
+        take(1), 
         catchError(error => {
           console.error('Error en pointsData:', error);
-          return of(null); // O un objeto vacío según tu necesidad
+          return of(null); 
         })
       ),
       reportsData: this.globalReports$.pipe(
-        filter(data => !!data?.data), // Filtramos datos nulos
-        take(1), // Tomamos solo la primera emisión válida
+        filter(data => !!data?.data), 
+        take(1), 
         catchError(error => {
           console.error('Error en reportsData:', error);
-          return of(null); // O un objeto vacío según tu necesidad
+          return of(null); 
         })
       )
     }).subscribe({
@@ -264,13 +254,11 @@ export class PointsComponent implements OnInit {
   }
 
   private processCombinedData(pointsData: any, reportsData: any): void {
-    // Verifica que los datos tengan la estructura esperada
     if (!pointsData?.data || !reportsData?.data) {
       console.error('Datos incompletos:', { pointsData, reportsData });
       this.combinedGroupedData = {};
       return;
     }
-     // Preprocesamiento básico de los datos
   const processedPoints = pointsData.data.map(point => ({
     attributes: {
       legacy_username: point.attributes?.legacy_username,
@@ -280,7 +268,6 @@ export class PointsComponent implements OnInit {
       active_days_streak: Number(point.attributes?.active_days_streak) || 0
     }
   }));
-
   const processedReports = reportsData.data.map(report => ({
     attributes: {
       legacy_username: report.attributes?.legacy_username,
@@ -289,54 +276,37 @@ export class PointsComponent implements OnInit {
       day_reported: report.attributes?.day_reported || ''
     }
   }));
-
-  // Usar EXCLUSIVAMENTE combineData para la lógica de combinación
   this.combinedGroupedData = this.combineData(processedPoints, processedReports);
   this.updateTableData();
 }
-
-  // Métodos para preparar datos para la tabla
   prepareTablePointsData(): TableRow [] {
     if (!this.combinedGroupedData || Object.keys(this.combinedGroupedData).length === 0) {
       console.warn('No hay datos combinados para mostrar');
       return [];
     }
-
     const tableData: TableRow[] = [];
-
     Object.entries(this.combinedGroupedData).forEach(([username, userData]) => {
       try {
         const reportsData = userData.reportsData || [];
-        const pointsData = userData.pointsData || [];
-  
-        // 1. Cálculo de DATOS SEMANALES (última semana)
+        const pointsData = userData.pointsData || [];  
         const weeklyData = reportsData.filter(report => 
           this.isDateInCurrentWeek(report.day_reported)
         );
-        
         const weeklyStudy = weeklyData.reduce((sum, day) => sum + (day.studied || 0), 0);
         const weeklyAdded = weeklyData.reduce((sum, day) => sum + (day.added || 0), 0);
         const studiedDays = weeklyData.filter(day => (day.studied || 0) > 0).length;
-
-        // 2. Cálculo de DATOS ACUMULADOS (totales históricos)
         const totalStudy = reportsData.reduce((sum, day) => sum + (day.studied || 0), 0);
         const totalAdded = reportsData.reduce((sum, day) => sum + (day.added || 0), 0);
-
-        // 3. Obtener streaks (del último registro)
         const lastPointData = pointsData[pointsData.length - 1] || {};
         const maxStreak = lastPointData.study_streak || 0;
         const maxAddedStreak = lastPointData.added_streak || 0;
         const maxActiveStreak = lastPointData.active_streak || 0;
         const maxActiveDaysStreak = lastPointData.active_days_streak || 0;
-
-       // 4. Cálculos según fórmula del PDF
         const streakBonus = this.calculateStreakBonus(maxStreak);
         const addedStreakBonus = this.calculateAddedStreakBonus(maxAddedStreak);
         const activeStreakBonus = this.calculateActiveStreakBonus(maxActiveStreak);
         const activeDaysStreakBonus = this.calculateActiveDaysStreakBonus(maxActiveDaysStreak);
         const lastPoint = pointsData[pointsData.length - 1] || {};
-        
-        // 5. Aplicar fórmulas según PDF
         const multiplier = this.calculateMultiplier(pointsData);
         const studyRate = this.calculateStudyRate(weeklyStudy, studiedDays || 1);
         
@@ -374,14 +344,11 @@ export class PointsComponent implements OnInit {
 
   private normalizeUsername(username: string): string {
     if (!username) return 'unknown';
-    // Elimina espacios, convierte a minúsculas y elimina caracteres especiales
     return username.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
   }
 
   private combineData(pointsData: any[], reportsData: any[]): { [username: string]: CombinedUserData } {
-    const combined: { [username: string]: CombinedUserData } = {};
-  
-    // Procesar pointsData
+    const combined: { [username: string]: CombinedUserData } = {};  
     pointsData.forEach(point => {
       const rawUsername = point.attributes?.legacy_username;
       const username = this.normalizeUsername(rawUsername);
@@ -389,9 +356,7 @@ export class PointsComponent implements OnInit {
         combined[username] = { pointsData: [], reportsData: [] };
       }
       combined[username].pointsData.push(this.processPoint(point));
-    });
-  
-    // Procesar reportsData
+    }); 
     reportsData.forEach(report => {
       const rawUsername = report.attributes?.legacy_username;
       const username = this.normalizeUsername(rawUsername);
@@ -400,7 +365,6 @@ export class PointsComponent implements OnInit {
       }
       combined[username].reportsData.push(this.processReport(report));
     });
-  
     return combined;
   }
 
@@ -413,7 +377,7 @@ export class PointsComponent implements OnInit {
       added_streak: Number(point.attributes?.added_streak) || 0,
       active_streak: Number(point.attributes?.active_streak) || 0,
       active_days_streak: Number(point.attributes?.active_days_streak) || 0,
-      day_reported: point.attributes?.day_reported || '' // <--- AQUI ES CLAVE
+      day_reported: point.attributes?.day_reported || '' 
     };
   }
   
@@ -426,7 +390,6 @@ export class PointsComponent implements OnInit {
     };
   }
   
-  // Métodos auxiliares
   private groupPointsByUser(points: any[]): void {
     if (!points || !Array.isArray(points) || points.length === 0) {
       this.groupedPoints = {}; 
@@ -455,38 +418,29 @@ export class PointsComponent implements OnInit {
     }, {});
   }
 
-  // Métodos de cálculo
   private calculateMultiplier(studentData: any[]): number {
     const wasActiveLastWeek = this.checkIfActiveLastWeek(studentData);
     return wasActiveLastWeek ? 1.10 : 0.90;
   }
-
   private calculateStudyRate(totalStudy: number, studiedDays: number): number {
     if (studiedDays === 0) return 0;
     return parseFloat((totalStudy / studiedDays).toFixed(2));
   }
-
   private calculateStreakBonus(streak: number): number {
     return parseFloat(Math.pow(streak, 1.15).toFixed(2));
   }
-
   private calculateActiveStreakBonus(activeStreak: number): number {
     return parseFloat(Math.pow(activeStreak * 7, 1.15).toFixed(2));
   }
-
   private calculateActiveDaysStreakBonus(activeDaysStreak: number): number {
     return parseFloat(Math.pow(activeDaysStreak, 1.15).toFixed(2));
   }
-  
   private calculateMaxLevel(studentData: any[]): number {
-    // Implementa tu lógica para calcular el nivel máximo
     return 0;
   }
-
   private calculateAddedStreakBonus(addedStreak: number): number {
     return parseFloat(Math.pow(addedStreak, 1.15).toFixed(2));
   }
-
   private checkIfActiveLastWeek(studentData: any[]): boolean {
     const today = new Date();
     const startOfThisWeek = this.getStartOfWeek(today);
@@ -505,7 +459,6 @@ export class PointsComponent implements OnInit {
     return studiedDaysLastWeek >= 6;
   }
 
-  // Métodos de manejo de fechas
   private getFormattedStartDate(): string {
     const startOfWeek = this.getStartOfWeek(this.selectedWeek);
     return formatDate(startOfWeek, "yyyy-MM-dd", "en");
@@ -541,7 +494,6 @@ export class PointsComponent implements OnInit {
     return daysOfWeek[date.getDay()];
   }
 
-  // Métodos de validación de fechas
   isValidStartDate(date: Date | null): boolean {
     return date ? date.getDay() === 3 : false;
   }
@@ -601,7 +553,6 @@ export class PointsComponent implements OnInit {
     return newDate;
   }
 
-  // Métodos de paginación
   onPageSizeChange(size: number): void {
     this.pageSize = size;
     this.currentPage = 1; 
@@ -623,7 +574,6 @@ export class PointsComponent implements OnInit {
     }
   }
 
-  // Método para generar reportes
   generateReport(): void {
     const startDate = this.getFormattedStartDate();
     const endDate = this.getFormattedEndDate();

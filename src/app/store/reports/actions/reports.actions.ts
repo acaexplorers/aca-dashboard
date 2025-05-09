@@ -4,6 +4,7 @@ export const loadGlobalReports = createAction(
   "[Reports] Load Global Reports",
   props<{ startDate: string; endDate: string }>()
 );
+console.log("Disparando Reports acción loadGlobalReports");
 
 export const loadGlobalReportsSuccess = createAction(
   "[Reports] Load Global Reports Success",

@@ -47,7 +47,7 @@ export class LoginComponent implements OnInit {
     });
 
     this.token$.subscribe((token) => {
-      console.log("token",token);
+      //console.log("token",token);
       if(token){
         this.router.navigate(["/dashboard"]);
       }

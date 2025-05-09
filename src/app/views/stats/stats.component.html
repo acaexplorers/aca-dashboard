@@ -1,5 +1,4 @@
 <div class="container">
-  <!-- Error and Loading Indicators -->
   <div *ngIf="isLoading" class="loading-spinner">
     <mat-spinner></mat-spinner>
   </div>
@@ -50,7 +49,7 @@
     </button>
   </div>
 
-  <!-- Table View -->
+    <!-- Table View -->
   <div *ngIf="viewMode === 'table' && !isLoading && !error" class="table-view">
     <table mat-table [dataSource]="filteredStudents" class="mat-elevation-z8">
       <!-- Name Column -->

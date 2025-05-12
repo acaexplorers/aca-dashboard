@@ -10,6 +10,16 @@ import { MatTableDataSource } from '@angular/material/table';
 import { selectGlobalReports } from "app/store/reports/selectors/reports.selectors";
 import * as ReportsActions from "app/store/reports/actions/reports.actions";
 
+import { FormControl } from '@angular/forms';
+import { startWith, map } from 'rxjs/operators';
+
+import { MatIconModule } from '@angular/material/icon';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatCardModule } from '@angular/material/card';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatButtonModule } from '@angular/material/button';
+import { MatListModule } from '@angular/material/list';
+
 interface PointData {
   attributes: {
     legacy_username: string;
@@ -73,24 +83,36 @@ interface CombinedUserData {
 })
 
 export class PointsComponent implements OnInit {
+showColumnMenu: boolean = false;
+
+filterStudents() {
+throw new Error('Method not implemented.');
+}
   @ViewChild(MatPaginator) paginator: MatPaginator;
 
-  displayedColumns: string[] = [
-    "student",
-    "points",
-    "totalPoints",
-    "added",
-    "studyRate",
-    "daysStudied",
-    "streak",
-    "studied",
-    "maxLevel",
-    "activeDays",
-    "addedStreak",
-    "activeStreak",
-    "activeDaysStreak",
-    "action",
-  ];  
+get displayedColumns(): string[] {
+  return this.allColumns.filter(col => col.visible).map(col => col.name);
+}
+
+
+
+  allColumns = [
+    { name: 'student', label: 'Student', visible: true },
+    { name: 'points', label: 'Points', visible: true },
+    { name: 'totalPoints', label: 'Total Points', visible: true },
+    { name: 'added', label: 'Added', visible: true },
+    { name: 'studyRate', label: 'Study Rate', visible: true },
+    { name: 'daysStudied', label: 'Days Studied', visible: true },
+    { name: 'streak', label: 'Streak', visible: true },
+    { name: 'studied', label: 'Studied', visible: true },
+    { name: 'maxLevel', label: 'Max Level', visible: true },
+    { name: 'activeDays', label: 'Active Days', visible: true },
+    { name: 'addedStreak', label: 'Added Streak', visible: true },
+    { name: 'activeStreak', label: 'Active Streak', visible: true },
+    { name: 'activeDaysStreak', label: 'Active Days Streak', visible: true },
+    { name: 'action', label: 'Action', visible: true },
+];
+
   pageSize = 10;
   currentPage = 1;
   totalItems = 0;
@@ -111,6 +133,9 @@ export class PointsComponent implements OnInit {
   error: string | null = null; 
   filteredPoints: any[] = [];
   combinedGroupedData: { [username: string]: CombinedUserData } = {};
+auto: any;
+filteredStudents: Observable<string[]>;
+searchControl = new FormControl();
 
   constructor(
     private store: Store,
@@ -118,6 +143,7 @@ export class PointsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+
     this.initializeData();
     this.setupDateRange();
     this.fetchCombinedData();
@@ -128,9 +154,21 @@ export class PointsComponent implements OnInit {
     this.pointsData$.subscribe(data => console.log('Datos de puntos:', data));
     this.globalReports$.subscribe(data => console.log('Datos de reports:', data));
     this.fetchCombinedData();
+
+    this.filteredStudents = this.searchControl.valueChanges.pipe(
+      startWith(''),
+      map(value => this._filterStudents(value))
+    );
+  }
+    
+    private _filterStudents(value: string): string[] {
+    const filterValue = value.toLowerCase();
+    return Object.keys(this.combinedGroupedData).filter(
+      student => student.toLowerCase().includes(filterValue)
+    );
   }
 
-  private initializeData(): void {
+    private initializeData(): void {
     this.pointsData$ = this.store.select(selectPointsData);
     this.globalReports$ = this.store.select(selectGlobalReports);
   }
@@ -212,6 +250,7 @@ export class PointsComponent implements OnInit {
 
   fetchCombinedData(): void {
     this.isLoading = true;
+    this.error = null;
     
     const startDate = this.getFormattedStartDate();
     const endDate = this.getFormattedEndDate();
@@ -227,6 +266,7 @@ export class PointsComponent implements OnInit {
         take(1), 
         catchError(error => {
           console.error('Error en pointsData:', error);
+          this.error = 'Failed to load points data';
           return of(null); 
         })
       ),
@@ -235,23 +275,28 @@ export class PointsComponent implements OnInit {
         take(1), 
         catchError(error => {
           console.error('Error en reportsData:', error);
+          this.error = 'Failed to load reports data';
           return of(null); 
         })
       )
     }).subscribe({
-      next: ({ pointsData, reportsData }) => {
-        console.log('Datos combinados recibidos:', { pointsData, reportsData });
-        this.processCombinedData(pointsData, reportsData);
-      },
-      error: (err) => {
-        console.error('Error al combinar datos:', err);
-        this.isLoading = false;
-      },
-      complete: () => {
-        this.isLoading = false;
+    next: ({ pointsData, reportsData }) => {
+      if (!pointsData || !reportsData) {
+        this.error = 'Incomplete data received';
+        return;
       }
-    });
-  }
+      this.processCombinedData(pointsData, reportsData);
+    },
+    error: (err) => {
+      console.error('Error al combinar datos:', err);
+      this.error = 'Error combining data';
+      this.isLoading = false;
+    },
+    complete: () => {
+      this.isLoading = false;
+    }
+  });
+}
 
   private processCombinedData(pointsData: any, reportsData: any): void {
     if (!pointsData?.data || !reportsData?.data) {
@@ -344,7 +389,8 @@ export class PointsComponent implements OnInit {
 
   private normalizeUsername(username: string): string {
     if (!username) return 'unknown';
-    return username.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+    const normalized = username.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+    return normalized.charAt(0).toUpperCase() + normalized.slice(1);
   }
 
   private combineData(pointsData: any[], reportsData: any[]): { [username: string]: CombinedUserData } {
@@ -368,18 +414,33 @@ export class PointsComponent implements OnInit {
     return combined;
   }
 
-  private processPoint(point: any): any {
+private processPoint(point: any): any {
+  if (!point || !point.attributes) {
+    console.error('Invalid point data:', point);
     return {
-      ...point.attributes,
-      studied: Number(point.attributes?.studied) || 0,
-      added: Number(point.attributes?.added) || 0,
-      study_streak: Number(point.attributes?.study_streak) || 0,
-      added_streak: Number(point.attributes?.added_streak) || 0,
-      active_streak: Number(point.attributes?.active_streak) || 0,
-      active_days_streak: Number(point.attributes?.active_days_streak) || 0,
-      day_reported: point.attributes?.day_reported || '' 
+      legacy_username: 'Unknown',
+      studied: 0,
+      added: 0,
+      study_streak: 0,
+      added_streak: 0,
+      active_streak: 0,
+      active_days_streak: 0,
+      day_reported: ''
     };
   }
+
+  return {
+    legacy_username: point.attributes?.legacy_username || 'Unknown',
+    studied: Number(point.attributes?.studied) || 0,
+    added: Number(point.attributes?.added) || 0,
+    study_streak: Number(point.attributes?.study_streak) || 0,
+    added_streak: Number(point.attributes?.added_streak) || 0,
+    active_streak: Number(point.attributes?.active_streak) || 0,
+    active_days_streak: Number(point.attributes?.active_days_streak) || 0,
+    day_reported: point.attributes?.day_reported || '',
+    level: Number(point.attributes?.level) || 0 // Añadir nivel si está disponible
+  };
+}
   
   private processReport(report: any): any {
     return {
@@ -423,8 +484,7 @@ export class PointsComponent implements OnInit {
     return wasActiveLastWeek ? 1.10 : 0.90;
   }
   private calculateStudyRate(totalStudy: number, studiedDays: number): number {
-    if (studiedDays === 0) return 0;
-    return parseFloat((totalStudy / studiedDays).toFixed(2));
+    return parseFloat((totalStudy / 7).toFixed(2));
   }
   private calculateStreakBonus(streak: number): number {
     return parseFloat(Math.pow(streak, 1.15).toFixed(2));
@@ -436,8 +496,11 @@ export class PointsComponent implements OnInit {
     return parseFloat(Math.pow(activeDaysStreak, 1.15).toFixed(2));
   }
   private calculateMaxLevel(studentData: any[]): number {
-    return 0;
+    if (!studentData || studentData.length === 0) return 0;
+    const levels = studentData.map(day => Number(day.level) || 0);
+    return Math.max(...levels);
   }
+
   private calculateAddedStreakBonus(addedStreak: number): number {
     return parseFloat(Math.pow(addedStreak, 1.15).toFixed(2));
   }
@@ -449,14 +512,13 @@ export class PointsComponent implements OnInit {
     const endOfLastWeek = new Date(startOfThisWeek);
     endOfLastWeek.setDate(endOfLastWeek.getDate() - 1);
   
-    const studiedDaysLastWeek = studentData.filter(day => {
+    // Contar reportes dentro del rango de la semana pasada
+    const reportsInLastWeekCount = studentData.filter(day => {
       const reportedDate = new Date(day.day_reported);
-      return reportedDate >= startOfLastWeek && 
-             reportedDate <= endOfLastWeek && 
-             (day.studied || 0) > 0;
+      return reportedDate >= startOfLastWeek && reportedDate <= endOfLastWeek;
     }).length;
-  
-    return studiedDaysLastWeek >= 6;
+
+    return reportsInLastWeekCount === 7;
   }
 
   private getFormattedStartDate(): string {

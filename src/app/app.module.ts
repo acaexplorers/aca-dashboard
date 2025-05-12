@@ -22,6 +22,11 @@ import { PointsStoreModule } from "app/store/points/points.store.module";
 import { environment } from "../environments/environment";
 import { metaReducers } from "./store/meta-reducers";
 
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { CommonModule } from '@angular/common';
+
 @NgModule({
   imports: [
     BrowserAnimationsModule,
@@ -32,6 +37,9 @@ import { metaReducers } from "./store/meta-reducers";
     RouterModule,
     AppRoutingModule,
     MatIconModule,
+    MatInputModule,
+    MatFormFieldModule,
+    MatAutocompleteModule,
     StoreModule.forRoot({ points: pointsReducer }), // Configura el reducer
     EffectsModule.forRoot([PointsEffects]), // Configura los efectos
     StoreModule.forRoot({}, { metaReducers }),

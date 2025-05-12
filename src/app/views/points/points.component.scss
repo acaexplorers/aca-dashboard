@@ -124,4 +124,67 @@
     font-style: italic;
     color: #888;
   }
+
+.column-menu {
+  padding: 12px 16px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  width: 220px;
+  position: absolute;
+  right: 20px;
+  z-index: 1000;
+}
+
+.column-toggle-container {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+}
+
+.gear-button {
+  font-size: 24px;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.column-popup {
+  background: white;
+  border: 1px solid #ccc;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border-radius: 8px;
+  padding: 12px;
+  width: 220px;
+  margin-top: 8px;
+  z-index: 1000;
+}
+
+.popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.popup-header a {
+  font-size: 12px;
+  color: #3f51b5;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.popup-fields {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.popup-fields label {
+  display: block;
+  font-size: 13px;
+  margin: 4px 0;
+}
+
 }

@@ -34,7 +34,7 @@ export class LoginComponent implements OnInit {
   ngOnInit(): void {
     this.error$.subscribe((error) => {
       let message = "wrong credentials";
-
+      console.log("error",error)
       if (error) {
         if (!error.status || error.status != 400) {
           message = "Server error";

@@ -1,21 +1,43 @@
+import {
+  ReportEntity,
+  LoadingState,
+  ErrorState,
+} from "app/types/reports.types";
+import { ApiResponse } from "app/utils/types";
+
 export interface ReportsState {
-  globalReports: any; // Global reports for all users
-  weeklyReports: any[]; // Weekly reports for a specific user
-  loadingGlobal: boolean; // Loading state for global reports
-  loadingWeekly: boolean; // Loading state for weekly reports
-  loadingSubmit: boolean; // Loading state for submitting a report
-  errorGlobal: any | null; // Error state for global reports
-  errorWeekly: any | null; // Error state for weekly reports
-  errorSubmit: any | null; // Error state for submitting a report
+  // Data
+  globalReports: ApiResponse<ReportEntity[]> | null;
+  weeklyReports: ReportEntity[];
+
+  // UI State
+  loading: LoadingState;
+  error: ErrorState;
+
+  // Metadata
+  selectedDateRange: {
+    startDate: string | null;
+    endDate: string | null;
+  };
+  selectedUsername: string | null;
 }
 
 export const initialReportsState: ReportsState = {
-  globalReports: {},
+  globalReports: null,
   weeklyReports: [],
-  loadingGlobal: false,
-  loadingWeekly: false,
-  loadingSubmit: false,
-  errorGlobal: null,
-  errorWeekly: null,
-  errorSubmit: null,
+  loading: {
+    global: false,
+    weekly: false,
+    submit: false,
+  },
+  error: {
+    global: null,
+    weekly: null,
+    submit: null,
+  },
+  selectedDateRange: {
+    startDate: null,
+    endDate: null,
+  },
+  selectedUsername: null,
 };

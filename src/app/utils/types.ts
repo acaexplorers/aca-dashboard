@@ -1,10 +1,7 @@
 export interface ApiResponse<T> {
-  data: Array<{
-    id: number;
-    attributes: T;
-  }>;
-  meta: {
-    pagination: {
+  data: T;
+  meta?: {
+    pagination?: {
       page: number;
       pageSize: number;
       pageCount: number;

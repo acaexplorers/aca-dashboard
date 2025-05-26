@@ -3,10 +3,12 @@ import { FormControl } from "@angular/forms";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { MatDialog } from "@angular/material/dialog";
 import { Store } from "@ngrx/store";
-import { Observable } from "rxjs";
+import { filter, Observable, take } from "rxjs";
 import {
   selectWeeklyReports,
-  selectSubmitReportLoading,
+  selectIsSubmitLoading,
+  selectSubmitError,
+  selectSubmitReportStatus,
 } from "app/store/reports/selectors/reports.selectors";
 import { selectAuthUsername } from "app/store/auth/selectors/auth.selectors";
 import * as ReportsActions from "app/store/reports/actions/reports.actions";
@@ -39,10 +41,12 @@ export class RegisterActivityComponent implements OnInit {
     ],
   };
 
-  selectedIndex = Number(localStorage.getItem("selectedIndex")) ?? 6;
+  selectedIndex =
+    Number(localStorage.getItem("selectedIndex")) ??
+    (new Date().getDay() + 6) % 7;
   daysCheckMarks: string[] = [];
-  added = new FormControl("");
-  studied = new FormControl("");
+  added = new FormControl<number | null>(null);
+  studied = new FormControl<number | null>(null);
   currentDate = "";
   userReports: any[] = []; // Local state for reports
   userReports$: Observable<any[]>; // Observable for weekly reports
@@ -59,7 +63,7 @@ export class RegisterActivityComponent implements OnInit {
   ngOnInit(): void {
     // Select observables
     this.userReports$ = this.store.select(selectWeeklyReports);
-    this.loadingSubmit$ = this.store.select(selectSubmitReportLoading);
+    this.loadingSubmit$ = this.store.select(selectIsSubmitLoading);
     this.username$ = this.store.select(selectAuthUsername);
 
     // Fetch weekly reports
@@ -118,51 +122,57 @@ export class RegisterActivityComponent implements OnInit {
       this.added.setValue(report.added);
       this.studied.setValue(report.studied);
     } else {
-      this.added.setValue("");
-      this.studied.setValue("");
+      this.added.setValue(null);
+      this.studied.setValue(null);
     }
 
     localStorage.setItem("selectedIndex", this.selectedIndex.toString());
   }
 
   submitReport(): void {
-    if (this.username) {
-      const currentDate = this.getFormattedDate(
-        this.getDay(this.selectedIndex)
-      );
-      const dataToSend = {
-        studied: this.studied.value,
-        added: this.added.value,
-        legacy_username: this.username, // Use the stored username
-        creation: this.getFormattedDate(new Date()),
-        day_reported: currentDate,
-      };
-
-      this.store.dispatch(
-        ReportsActions.submitUserReport({ report: { data: dataToSend } })
-      );
-
-      this.updateMemoryReports(
-        currentDate,
-        this.added.value,
-        this.studied.value
-      );
-
-      this.snackBar.open("Report submitted successfully!", "OK", {
-        duration: 2000,
-      });
-      this.openDialog();
-    } else {
+    if (!this.username) {
       this.snackBar.open("Error: Username not available.", "OK", {
         duration: 2000,
       });
+      return;
     }
+
+    const currentDate = this.getFormattedDate(this.getDay(this.selectedIndex));
+    const dataToSend = {
+      studied: Number(this.studied.value),
+      added: Number(this.added.value),
+      legacy_username: this.username,
+      creation: this.getFormattedDate(new Date()),
+      day_reported: currentDate,
+    };
+
+    this.store.dispatch(
+      ReportsActions.submitUserReport({ report: dataToSend })
+    );
+
+    // Single subscription for both success/error
+    this.store
+      .select(selectSubmitReportStatus)
+      .pipe(
+        filter((status) => !status.loading),
+        take(1)
+      )
+      .subscribe((status) => {
+        this.snackBar.open(
+          status.error
+            ? `Error: I can't submit the report`
+            : "Report submitted!",
+          "OK",
+          { duration: status.error ? 3000 : 2000 }
+        );
+        this.openDialog(status.error ? true : false);
+      });
   }
 
   updateMemoryReports(
     day_reported: string,
-    added: string,
-    studied: string
+    added: number,
+    studied: number
   ): void {
     const existingIndex = this.userReports.findIndex(
       (report) => report.day_reported === day_reported
@@ -175,10 +185,14 @@ export class RegisterActivityComponent implements OnInit {
     this.updateDaysCheckMarks();
   }
 
-  openDialog(): void {
-    this.dialog.open(DialogComponent, {
-      width: "250px",
-      data: { message: "Activity registered successfully" },
-    });
+  openDialog(error = false): void {
+    if (!error) {
+      this.dialog.open(DialogComponent, {
+        data: {
+          message: "Activity registered successfully",
+          type: "success",
+        },
+      });
+    }
   }
 }

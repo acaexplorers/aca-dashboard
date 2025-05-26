@@ -1,8 +1,36 @@
-<h1 mat-dialog-title>
-  <mat-icon [style.color]="getColor()">{{ getIcon() }}</mat-icon>
-  {{ data.type | titlecase }}
-</h1>
-<div mat-dialog-content>{{ data.message }}</div>
-<div mat-dialog-actions>
-  <button mat-button (click)="closeDialog()">OK</button>
+<div [class]="getDialogClass()" @slideIn>
+  <!-- Header with Icon and Title -->
+  <div class="dialog-header" mat-dialog-title>
+    <div class="dialog-icon-container">
+      <mat-icon 
+        [class]="getIconClass()" 
+        @iconAnimation>
+        {{ getIcon() }}
+      </mat-icon>
+    </div>
+    <h2 class="dialog-title">{{ getTitle() }}</h2>
+  </div>
+
+  <!-- Content -->
+  <div class="dialog-content" mat-dialog-content>
+    <p class="dialog-message">{{ data.message }}</p>
+  </div>
+
+  <!-- Actions -->
+  <div class="dialog-actions" mat-dialog-actions>
+    <button 
+      *ngIf="data.showCancel"
+      mat-button 
+      class="dialog-button dialog-button--secondary"
+      (click)="closeDialog(false)">
+      Cancel
+    </button>
+    <button 
+      mat-raised-button 
+      [class]="'dialog-button dialog-button--primary dialog-button--' + data.type"
+      (click)="closeDialog(true)"
+      cdkFocusInitial>
+      {{ getConfirmText() }}
+    </button>
+  </div>
 </div>

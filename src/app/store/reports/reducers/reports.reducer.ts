@@ -1,58 +1,76 @@
 import { createReducer, on } from "@ngrx/store";
-import * as ReportsActions from "app/store/reports/actions/reports.actions";
-import { initialReportsState } from "../reports.state";
+import * as ReportsActions from "../actions/reports.actions";
+import { initialReportsState, ReportsState } from "../reports.state";
 
-export const reportsReducer = createReducer(
+export const reportsReducer = createReducer<ReportsState>(
   initialReportsState,
 
   // Global Reports
-  on(ReportsActions.loadGlobalReports, (state) => ({
+  on(ReportsActions.loadGlobalReports, (state, { startDate, endDate }) => ({
     ...state,
-    loadingGlobal: true,
-    errorGlobal: null,
+    loading: { ...state.loading, global: true },
+    error: { ...state.error, global: null },
+    selectedDateRange: { startDate, endDate },
   })),
+  
   on(ReportsActions.loadGlobalReportsSuccess, (state, { globalReports }) => ({
     ...state,
     globalReports,
-    loadingGlobal: false,
+    loading: { ...state.loading, global: false },
   })),
+  
   on(ReportsActions.loadGlobalReportsFailure, (state, { error }) => ({
     ...state,
-    loadingGlobal: false,
-    errorGlobal: error,
+    loading: { ...state.loading, global: false },
+    error: { ...state.error, global: error },
   })),
 
   // Weekly Reports
-  on(ReportsActions.loadWeeklyReports, (state) => ({
+  on(ReportsActions.loadWeeklyReports, (state, { startDate, endDate, username }) => ({
     ...state,
-    loadingWeekly: true,
-    errorWeekly: null,
+    loading: { ...state.loading, weekly: true },
+    error: { ...state.error, weekly: null },
+    selectedDateRange: { startDate, endDate },
+    selectedUsername: username,
   })),
+  
   on(ReportsActions.loadWeeklyReportsSuccess, (state, { weeklyReports }) => ({
     ...state,
     weeklyReports,
-    loadingWeekly: false,
+    loading: { ...state.loading, weekly: false },
   })),
+  
   on(ReportsActions.loadWeeklyReportsFailure, (state, { error }) => ({
     ...state,
-    loadingWeekly: false,
-    errorWeekly: error,
+    loading: { ...state.loading, weekly: false },
+    error: { ...state.error, weekly: error },
   })),
 
   // Submit Report
   on(ReportsActions.submitUserReport, (state) => ({
     ...state,
-    loadingSubmit: true,
-    errorSubmit: null,
+    loading: { ...state.loading, submit: true },
+    error: { ...state.error, submit: null },
   })),
+  
   on(ReportsActions.submitUserReportSuccess, (state, { report }) => ({
     ...state,
-    //globalReports: [...state.globalReports, report],
-    loadingSubmit: false,
+    loading: { ...state.loading, submit: false },
   })),
+  
   on(ReportsActions.submitUserReportFailure, (state, { error }) => ({
     ...state,
-    loadingSubmit: false,
-    errorSubmit: error,
+    loading: { ...state.loading, submit: false },
+    error: { ...state.error, submit: error },
+  })),
+
+  // Clear errors
+  on(ReportsActions.clearReportsErrors, (state) => ({
+    ...state,
+    error: {
+      global: null,
+      weekly: null,
+      submit: null,
+    },
   }))
 );

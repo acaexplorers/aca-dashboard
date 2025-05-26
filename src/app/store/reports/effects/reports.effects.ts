@@ -4,6 +4,8 @@ import { ReportsService } from "app/services/reports.service";
 import { of } from "rxjs";
 import { catchError, map, mergeMap } from "rxjs/operators";
 import * as ReportsActions from "app/store/reports/actions/reports.actions";
+import { ReportEntity } from "app/types/reports.types";
+import { HttpErrorResponse, HttpResponse } from "@angular/common/http";
 
 @Injectable()
 export class ReportsEffects {
@@ -51,9 +53,24 @@ export class ReportsEffects {
       ofType(ReportsActions.submitUserReport),
       mergeMap(({ report }) =>
         this.reportsService.sendReport(report).pipe(
-          map(() => ReportsActions.submitUserReportSuccess({ report })),
-          catchError((error) =>
-            of(ReportsActions.submitUserReportFailure({ error }))
+          map((response: HttpResponse<any>) => {
+            console.log("response",response);
+            // Check status code
+            if (response.status >= 200 && response.status < 300) {
+              return ReportsActions.submitUserReportSuccess({ report:response.body.data });
+            } else {
+              alert("I'm groing to throw an error");
+              throw new Error(`Server returned ${response.status}`);
+            }
+          }),
+          catchError((error: HttpErrorResponse) =>
+            of(
+              ReportsActions.submitUserReportFailure({
+                error: error.status
+                  ? `Error ${error.status}: ${error.message}`
+                  : error.message,
+              })
+            )
           )
         )
       )

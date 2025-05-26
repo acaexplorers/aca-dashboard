@@ -6,6 +6,7 @@ import { map, switchMap, take } from "rxjs/operators";
 import { selectAuthToken } from "app/store/auth/selectors/auth.selectors";
 import { environment } from "../../environments/environment";
 import { ApiResponse } from "app/utils/types";
+import { ReportAttributes, ReportEntity } from "app/types/reports.types";
 
 @Injectable({
   providedIn: "root",
@@ -45,16 +46,21 @@ export class ReportsService {
    * Send a report (upsert operation).
    * @param report Report data
    */
-  sendReport(report: any): Observable<any> {
+  sendReport(report: Partial<ReportAttributes>): Observable<any> {
     return this.getToken().pipe(
-      switchMap((token) => {
+      switchMap(token => {
         const headers = new HttpHeaders({
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token}`
         });
-
-        const url = `${this.baseUrl}/scholar-reports/upsert`;
-        return this.http.post(url, report, { headers });
+  
+        // Wrap the report in a data object for Strapi v4
+        const strapiPayload = { data: report };
+        
+        return this.http.post(`${this.baseUrl}/scholar-reports/upsert`, strapiPayload, { 
+          headers,
+          observe: 'response' 
+        });
       })
     );
   }
@@ -70,20 +76,19 @@ export class ReportsService {
     endDate: string,
     username: string
   ): Observable<any[]> {
-    console.log('params', startDate, endDate, username);
+    console.log("params", startDate, endDate, username);
     return this.getToken().pipe(
       switchMap((token) => {
         const headers = new HttpHeaders({
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         });
-  
+
         const url = `${this.baseUrl}/scholar-reports?filters[day_reported][$gte]=${startDate}&filters[day_reported][$lte]=${endDate}&filters[legacy_username]=${username}`;
-        return this.http.get<ApiResponse<any>>(url, { headers }).pipe(
-          map((response) => response.data)
-        );
+        return this.http
+          .get<ApiResponse<any>>(url, { headers })
+          .pipe(map((response) => response.data));
       })
     );
   }
-  
 }

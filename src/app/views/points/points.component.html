@@ -1,14 +1,14 @@
 <div class="container">
   <!-- Error and Loading Indicators -->
-  <div *ngIf="isLoading" class="loading-spinner">
+  <div *ngIf="isLoading$ | async" class="loading-spinner">
     <mat-spinner></mat-spinner>
   </div>
-  <div *ngIf="error" class="error-message">
+  <div *ngIf="error$ | async as error" class="error-message">
     {{ error }}
   </div>
 
   <!-- Week Selector -->
-  <div class="date-input" *ngIf="!isLoading && !error">
+  <div class="date-input" *ngIf="!(isLoading$ | async) && !(error$ | async)">
     <app-week-selector
       [selectedWeek]="selectedWeek"
       (weekChange)="onWeekChange($event)"
@@ -16,8 +16,19 @@
     </app-week-selector>
   </div>
 
+  <!-- Action Buttons -->
+  <div class="action-buttons" *ngIf="!(isLoading$ | async) && !(error$ | async)">
+    <button
+      mat-raised-button
+      color="accent"
+      (click)="recalculateAllPoints()"
+      class="recalculate-btn">
+      🔄 Recalculate All Points
+    </button>
+  </div>
+
   <!-- Search Input -->
-  <mat-form-field appearance="outline" *ngIf="!isLoading && !error">
+  <mat-form-field appearance="outline" *ngIf="!(isLoading$ | async) && !(error$ | async)">
     <mat-label>Search for students...</mat-label>
     <input
       matInput
@@ -28,7 +39,7 @@
   </mat-form-field>
 
   <!-- Switch View Buttons -->
-  <div *ngIf="!isLoading && !error">
+  <div *ngIf="!(isLoading$ | async) && !(error$ | async)">
     <button
       mat-flat-button
       (click)="switchView('table')"
@@ -47,100 +58,36 @@
   </div>
 
   <!-- Table View -->
-  <div *ngIf="viewMode === 'table' && !isLoading && !error" class="table-view">
+  <div *ngIf="viewMode === 'table' && !(isLoading$ | async) && !(error$ | async)" class="table-view">
     <table mat-table [dataSource]="filteredStudents" class="mat-elevation-z8">
-      <!-- Student Column -->
-      <ng-container matColumnDef="student">
+      <!-- Username Column -->
+      <ng-container matColumnDef="username">
         <th mat-header-cell *matHeaderCellDef>Student</th>
-        <td mat-cell *matCellDef="let element">{{ element.student }}</td>
-      </ng-container>
-
-      <!-- Level Column -->
-      <ng-container matColumnDef="level">
-        <th mat-header-cell *matHeaderCellDef>Level</th>
-        <td mat-cell *matCellDef="let element">{{ element.level }}</td>
-      </ng-container>
-
-      <!-- Habit Action Column -->
-      <ng-container matColumnDef="habitAction">
-        <th mat-header-cell *matHeaderCellDef>Habit Action</th>
-        <td mat-cell *matCellDef="let element">{{ element.habitAction }}</td>
-      </ng-container>
-
-      <!-- Points Column -->
-      <ng-container matColumnDef="points">
-        <th mat-header-cell *matHeaderCellDef>Points</th>
-        <td mat-cell *matCellDef="let element">{{ element.points }}</td>
-      </ng-container>
-
-      <!-- Total Points Column -->
-      <ng-container matColumnDef="totalPoints">
-        <th mat-header-cell *matHeaderCellDef>Total Points</th>
-        <td mat-cell *matCellDef="let element">{{ element.totalPoints }}</td>
-      </ng-container>
-
-      <!-- Contributed Column -->
-      <ng-container matColumnDef="contributed">
-        <th mat-header-cell *matHeaderCellDef>% Contributed</th>
-        <td mat-cell *matCellDef="let element">{{ element.contributed }}</td>
-      </ng-container>
-
-      <!-- Added Column -->
-      <ng-container matColumnDef="added">
-        <th mat-header-cell *matHeaderCellDef>Added</th>
-        <td mat-cell *matCellDef="let element">{{ element.added }}</td>
-      </ng-container>
-
-      <!-- Status Column -->
-      <ng-container matColumnDef="status">
-        <th mat-header-cell *matHeaderCellDef>Status</th>
-        <td mat-cell *matCellDef="let element">
-          <span [class]="'status-' + element.status.toLowerCase()">
-            {{ element.status }}
-          </span>
-        </td>
+        <td mat-cell *matCellDef="let element">{{ element.username }}</td>
       </ng-container>
 
       <!-- Study Rate Column -->
       <ng-container matColumnDef="studyRate">
         <th mat-header-cell *matHeaderCellDef>Study Rate</th>
-        <td mat-cell *matCellDef="let element">{{ element.studyRate }}%</td>
+        <td mat-cell *matCellDef="let element">{{ element.studyRate }}</td>
       </ng-container>
 
-      <!-- Days Studied Column -->
-      <ng-container matColumnDef="daysStudied">
+      <!-- Studied Days Column -->
+      <ng-container matColumnDef="studiedDays">
         <th mat-header-cell *matHeaderCellDef>Days Studied</th>
-        <td mat-cell *matCellDef="let element">{{ element.daysStudied }}</td>
+        <td mat-cell *matCellDef="let element">{{ element.studiedDays }}</td>
       </ng-container>
 
-      <!-- Streak Column -->
-      <ng-container matColumnDef="streak">
-        <th mat-header-cell *matHeaderCellDef>Streak</th>
-        <td mat-cell *matCellDef="let element">{{ element.streak }}</td>
+      <!-- Total Added Column -->
+      <ng-container matColumnDef="totalAdded">
+        <th mat-header-cell *matHeaderCellDef>Total Added</th>
+        <td mat-cell *matCellDef="let element">{{ element.totalAdded }}</td>
       </ng-container>
 
-      <!-- Studied Column -->
-      <ng-container matColumnDef="studied">
-        <th mat-header-cell *matHeaderCellDef>Studied</th>
-        <td mat-cell *matCellDef="let element">{{ element.studied }} hrs</td>
-      </ng-container>
-
-      <!-- Max Column -->
-      <ng-container matColumnDef="max">
-        <th mat-header-cell *matHeaderCellDef>Max</th>
-        <td mat-cell *matCellDef="let element">{{ element.max }}</td>
-      </ng-container>
-
-      <!-- Max Level Column -->
-      <ng-container matColumnDef="maxLevel">
-        <th mat-header-cell *matHeaderCellDef>Max Level</th>
-        <td mat-cell *matCellDef="let element">{{ element.maxLevel }}</td>
-      </ng-container>
-
-      <!-- Active Days Column -->
-      <ng-container matColumnDef="activeDays">
-        <th mat-header-cell *matHeaderCellDef>Active Days</th>
-        <td mat-cell *matCellDef="let element">{{ element.activeDays }}</td>
+      <!-- Study Streak Column -->
+      <ng-container matColumnDef="studyStreak">
+        <th mat-header-cell *matHeaderCellDef>Study Streak</th>
+        <td mat-cell *matCellDef="let element">{{ element.studyStreak }}</td>
       </ng-container>
 
       <!-- Added Streak Column -->
@@ -158,18 +105,27 @@
       <!-- Active Days Streak Column -->
       <ng-container matColumnDef="activeDaysStreak">
         <th mat-header-cell *matHeaderCellDef>Active Days Streak</th>
-        <td mat-cell *matCellDef="let element">{{ element.activeDaysStreak }}</td>
+        <td mat-cell *matCellDef="let element">{{ element.activeDaysStreak }} Days</td>
+      </ng-container>
+
+      <!-- Points Column -->
+      <ng-container matColumnDef="points">
+        <th mat-header-cell *matHeaderCellDef>Points</th>
+        <td mat-cell *matCellDef="let element">
+          <span class="points-value">{{ element.points }}</span>
+        </td>
       </ng-container>
 
       <!-- Action Column -->
       <ng-container matColumnDef="action">
-        <th mat-header-cell *matHeaderCellDef>Action</th>
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
         <td mat-cell *matCellDef="let element">
           <button 
             mat-raised-button 
-            class="generate-button"
-            (click)="generateAction(element)">
-            GENERATE
+            class="calculate-button"
+            (click)="calculatePoints(element)"
+            matTooltip="Calculate Points Breakdown">
+            📊 CALCULATE
           </button>
         </td>
       </ng-container>
@@ -180,42 +136,56 @@
   </div>
 
   <!-- Card View -->
-  <div *ngIf="viewMode === 'cards' && !isLoading && !error" class="card-view">
+  <div *ngIf="viewMode === 'cards' && !(isLoading$ | async) && !(error$ | async)" class="card-view">
     <mat-accordion>
       <mat-expansion-panel *ngFor="let student of filteredCardStudents" class="student-card">
         <mat-expansion-panel-header>
           <mat-panel-title>{{ student.name }}</mat-panel-title>
           <mat-panel-description>
-            Level {{ student.level }} | {{ student.points }} pts | {{ student.status }}
+            {{ student.points }} points | Study Rate: {{ student.stats.studyRate }}
           </mat-panel-description>
         </mat-expansion-panel-header>
         
         <div class="student-stats">
-          <div class="stat-row">
-            <strong>Points:</strong> {{ student.points }} / {{ student.totalPoints }}
+          <div class="stats-grid">
+            <div class="stat-item">
+              <strong>Study Rate:</strong> {{ student.stats.studyRate }}
+            </div>
+            <div class="stat-item">
+              <strong>Days Studied:</strong> {{ student.stats.studiedDays }}
+            </div>
+            <div class="stat-item">
+              <strong>Total Study:</strong> {{ student.stats.totalStudy }}
+            </div>
+            <div class="stat-item">
+              <strong>Total Added:</strong> {{ student.stats.totalAdded }}
+            </div>
+            <div class="stat-item">
+              <strong>Study Streak:</strong> {{ student.stats.studyStreak }}
+            </div>
+            <div class="stat-item">
+              <strong>Added Streak:</strong> {{ student.stats.addedStreak }}
+            </div>
+            <div class="stat-item">
+              <strong>Active Streak:</strong> {{ student.stats.activeStreak }}
+            </div>
+            <div class="stat-item">
+              <strong>Active Days Streak:</strong> {{ student.stats.activeDaysStreak }} Days
+            </div>
           </div>
-          <div class="stat-row">
-            <strong>Study Rate:</strong> {{ student.stats.studyRate }}%
-          </div>
-          <div class="stat-row">
-            <strong>Days Studied:</strong> {{ student.stats.daysStudied }}
-          </div>
-          <div class="stat-row">
-            <strong>Current Streak:</strong> {{ student.stats.streak }}
-          </div>
-          <div class="stat-row">
-            <strong>Hours Studied:</strong> {{ student.stats.studied }}
-          </div>
-          <div class="stat-row">
-            <strong>Active Days:</strong> {{ student.stats.activeDays }}
-          </div>
-          <div class="stat-row">
-            <strong>Active Streak:</strong> {{ student.stats.activeDaysStreak }}
+
+          <div class="points-section">
+            <div class="current-points">
+              <strong>Current Points:</strong> {{ student.points }}
+            </div>
           </div>
           
           <div class="card-actions">
-            <button mat-raised-button class="generate-button" (click)="generateAction(student)">
-              GENERATE
+            <button 
+              mat-raised-button 
+              class="calculate-button" 
+              (click)="calculatePoints(student)">
+              📊 Calculate Points Breakdown
             </button>
           </div>
         </div>

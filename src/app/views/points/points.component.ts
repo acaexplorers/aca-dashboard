@@ -1,10 +1,14 @@
 import { Component, OnInit } from "@angular/core";
 import { Store } from "@ngrx/store";
 import { Observable } from "rxjs";
-import { MatTableDataSource } from "@angular/material/table";
-import { StudentData } from "app/types/points.types";
-
-
+import { MatDialog } from "@angular/material/dialog";
+import * as PointsActions from "app/store/points/actions/points.actions";
+import {
+  selectStudentsWithPoints,
+  selectPointsLoading,
+  selectPointsError,
+} from "app/store/points/selectors/points.selectors";
+import { CombinedStudentData } from "app/types/points.types";
 
 @Component({
   selector: "app-points",
@@ -12,232 +16,164 @@ import { StudentData } from "app/types/points.types";
   styleUrls: ["./points.component.scss"],
 })
 export class PointsComponent implements OnInit {
-  viewMode: string = "table"; // Default to table view (since this is primarily tabular data)
-  filteredStudents: StudentData[] = [];
+  viewMode: string = "table";
+  filteredStudents: CombinedStudentData[] = [];
   filteredCardStudents: any[] = [];
   searchTerm: string = "";
-  
+
   displayedColumns: string[] = [
-    "student",
-    "level",
-    "habitAction", 
-    "points",
-    "totalPoints",
-    "contributed",
-    "added",
-    "status",
+    "username",
     "studyRate",
-    "daysStudied",
-    "streak",
-    "studied",
-    "max",
-    "maxLevel",
-    "activeDays",
+    "studiedDays",
+    "totalAdded",
+    "studyStreak",
     "addedStreak",
     "activeStreak",
     "activeDaysStreak",
+    "points",
     "action",
   ];
 
   selectedWeek: Date = new Date();
-  // pointsData$: Observable<any>; // Uncomment when you have the store
-  allStudentsData: StudentData[] = [];
-  isLoading: boolean = false;
-  error: string | null = null;
 
-  constructor(private store: Store) {}
+  // Store observables
+  allStudentsData$: Observable<CombinedStudentData[]>;
+  isLoading$: Observable<boolean>;
+  error$: Observable<string | null>;
+
+  constructor(private store: Store, private dialog: MatDialog) {
+    // Initialize observables
+    this.allStudentsData$ = this.store.select(selectStudentsWithPoints);
+    this.isLoading$ = this.store.select(selectPointsLoading);
+    this.error$ = this.store.select(selectPointsError);
+  }
 
   ngOnInit(): void {
-    // Uncomment when you have the store set up
-    // this.pointsData$ = this.store.select(selectPointsData);
-    
     this.loadPointsData();
-    
-    // Uncomment when you have the store
-    // this.pointsData$.subscribe({
-    //   next: (data) => {
-    //     this.isLoading = false;
-    //     this.error = null;
-    //     this.processPointsData(data);
-    //     this.updateFilteredData();
-    //   },
-    //   error: (err) => {
-    //     this.isLoading = false;
-    //     this.error = "Failed to fetch points data. Please try again.";
-    //     console.error("Error fetching points:", err);
-    //   },
-    // });
 
-    // For now, using mock data
-    this.initializeMockData();
-    this.updateFilteredData();
+    // Subscribe to data changes
+    this.allStudentsData$.subscribe((students) => {
+      this.filteredStudents = [...students];
+      this.filteredCardStudents = this.prepareCardData(students);
+    });
   }
 
   loadPointsData(): void {
-    this.isLoading = true;
-    
-    // Uncomment when you have the store/API
-    // const range = this.getCustomWeekRange(this.selectedWeek);
-    // const startDate = moment(range.start).format('YYYY-MM-DD');
-    // const endDate = moment(range.end).format('YYYY-MM-DD');
-    // 
-    // this.store.dispatch(
-    //   PointsActions.loadPointsData({ startDate, endDate })
-    // );
+    const range = this.getCustomWeekRange(this.selectedWeek);
+    const startDate = this.formatDate(range.start);
+    const endDate = this.formatDate(range.end);
 
-    // Mock loading delay
-    setTimeout(() => {
-      this.isLoading = false;
-    }, 1000);
+    this.store.dispatch(PointsActions.loadPointsData({ startDate, endDate }));
   }
 
-  initializeMockData(): void {
-    this.allStudentsData = [
-      {
-        student: "Deborah",
-        level: 0,
-        habitAction: 0,
-        points: 218,
-        totalPoints: 48802,
-        contributed: "-",
-        added: 1,
-        status: "Active",
-        studyRate: 52,
-        daysStudied: 6,
-        streak: 68,
-        studied: 367,
-        max: 91,
-        maxLevel: 0,
-        activeDays: 6,
-        addedStreak: 1,
-        activeStreak: 9,
-        activeDaysStreak: "14 Days",
-      },
-      {
-        student: "Teacher",
-        level: 8,
-        habitAction: 0,
-        points: 187,
-        totalPoints: 112051,
-        contributed: "100 | 68.1",
-        added: 2,
-        status: "Active",
-        studyRate: 23,
-        daysStudied: 1,
-        streak: 2,
-        studied: 163,
-        max: 163,
-        maxLevel: 8,
-        activeDays: 1,
-        addedStreak: 1,
-        activeStreak: 6,
-        activeDaysStreak: "2 Days",
-      },
-      {
-        student: "Arley",
-        level: 2,
-        habitAction: 0,
-        points: 87,
-        totalPoints: 441603,
-        contributed: "31.9",
-        added: 0,
-        status: "Active",
-        studyRate: 8,
-        daysStudied: 1,
-        streak: 11,
-        studied: 58,
-        max: 58,
-        maxLevel: 2,
-        activeDays: 1,
-        addedStreak: 0,
-        activeStreak: 4,
-        activeDaysStreak: "6 Days",
-      },
-      {
-        student: "Maria",
-        level: 5,
-        habitAction: 12,
-        points: 345,
-        totalPoints: 78934,
-        contributed: "45.2",
-        added: 3,
-        status: "Active",
-        studyRate: 78,
-        daysStudied: 5,
-        streak: 23,
-        studied: 289,
-        max: 120,
-        maxLevel: 5,
-        activeDays: 5,
-        addedStreak: 2,
-        activeStreak: 12,
-        activeDaysStreak: "21 Days",
-      },
-    ];
-  }
-
-  updateFilteredData(): void {
-    this.filteredStudents = [...this.allStudentsData];
-    this.filteredCardStudents = this.prepareCardData();
-  }
-
-  prepareCardData(): any[] {
-    return this.allStudentsData.map(student => ({
-      name: student.student,
-      level: student.level,
+  prepareCardData(students: CombinedStudentData[]): any[] {
+    return students.map((student) => ({
+      name: student.username,
       points: student.points,
-      totalPoints: student.totalPoints,
-      status: student.status,
       stats: {
         studyRate: student.studyRate,
-        daysStudied: student.daysStudied,
-        streak: student.streak,
-        studied: student.studied,
-        activeDays: student.activeDays,
-        activeDaysStreak: student.activeDaysStreak
-      }
+        studiedDays: student.studiedDays,
+        totalStudy: student.totalStudy,
+        totalAdded: student.totalAdded,
+        studyStreak: student.studyStreak,
+        addedStreak: student.addedStreak,
+        activeStreak: student.activeStreak,
+        activeDaysStreak: student.activeDaysStreak,
+      },
     }));
   }
 
   filterStudents(): void {
-    if (this.searchTerm.trim() === "") {
-      this.updateFilteredData();
-    } else {
-      this.filteredStudents = this.allStudentsData.filter((student) =>
-        student.student.toLowerCase().includes(this.searchTerm.toLowerCase())
-      );
-      this.filteredCardStudents = this.prepareCardData().filter((student) =>
-        student.name.toLowerCase().includes(this.searchTerm.toLowerCase())
-      );
-    }
+    this.allStudentsData$.subscribe((allStudents) => {
+      if (this.searchTerm.trim() === "") {
+        this.filteredStudents = [...allStudents];
+        this.filteredCardStudents = this.prepareCardData(allStudents);
+      } else {
+        this.filteredStudents = allStudents.filter((student) =>
+          student.username.toLowerCase().includes(this.searchTerm.toLowerCase())
+        );
+        this.filteredCardStudents = this.prepareCardData(this.filteredStudents);
+      }
+    });
   }
 
   switchView(view: string): void {
     this.viewMode = view;
   }
 
-  onWeekChange(weekRange: {start: Date, end: Date}): void {
+  onWeekChange(weekRange: { start: Date; end: Date }): void {
     this.selectedWeek = weekRange.start;
     this.loadPointsData();
   }
 
-  generateAction(student: StudentData): void {
-    console.log(`Generating action for ${student.student}`);
-    // Implement your generate logic here
+  /**
+   * Show points breakdown for a student
+   */
+  calculatePoints(student: CombinedStudentData): void {
+    if (student.pointsBreakdown) {
+      const breakdownText = this.getPointsBreakdownText(
+        student.pointsBreakdown,
+        student.username
+      );
+      alert(breakdownText);
+    } else {
+      alert(`No breakdown available for ${student.username}`);
+    }
   }
 
-  // Helper method for custom week range (same as stats component)
-  getCustomWeekRange(date: Date): { start: Date, end: Date } {
+  /**
+   * Recalculate all students' points
+   */
+  recalculateAllPoints(): void {
+    this.store.dispatch(PointsActions.recalculatePoints());
+    console.log("Points recalculation triggered!");
+  }
+
+  /**
+   * Format points breakdown for display
+   */
+  private getPointsBreakdownText(breakdown: any, studentName: string): string {
+    return `
+Points Calculation for ${studentName}:
+
+• Multiplier: ${breakdown.multiplier} ${
+      breakdown.multiplier === 1.1 ? "(Active Week)" : "(Inactive Week)"
+    }
+• Study Rate: ${breakdown.studyRate}
+• Total Added: ${breakdown.totalAdded}
+• Streak Bonus: ${breakdown.streakBonus}
+• Added Streak Bonus: ${breakdown.addedStreakBonus}
+• Active Streak Bonus: ${breakdown.activeStreakBonus}
+• Active Days Streak Bonus: ${breakdown.activeDaysStreakBonus}
+
+Formula: (${breakdown.multiplier} × ${breakdown.studyRate}) + ${
+      breakdown.totalAdded
+    } + ${breakdown.streakBonus} + ${breakdown.addedStreakBonus} + ${
+      breakdown.activeStreakBonus
+    } + ${breakdown.activeDaysStreakBonus}
+
+Total Points: ${breakdown.totalPoints}
+    `.trim();
+  }
+
+  /**
+   * Helper methods
+   */
+  private getCustomWeekRange(date: Date): { start: Date; end: Date } {
     const momentDate = new Date(date);
     const dayOfWeek = momentDate.getDay();
     const daysFromWednesday = (dayOfWeek + 4) % 7;
-    
+
     const wednesday = new Date(momentDate);
     wednesday.setDate(momentDate.getDate() - daysFromWednesday);
-    
+
     const tuesday = new Date(wednesday);
     tuesday.setDate(wednesday.getDate() + 6);
-    
+
     return { start: wednesday, end: tuesday };
+  }
+
+  private formatDate(date: Date): string {
+    return date.toISOString().split("T")[0]; // YYYY-MM-DD format
   }
 }

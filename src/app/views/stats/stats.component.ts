@@ -3,7 +3,7 @@ import { Store } from "@ngrx/store";
 import { Observable } from "rxjs";
 import { selectGlobalReports } from "app/store/reports/selectors/reports.selectors";
 import * as ReportsActions from "app/store/reports/actions/reports.actions";
-import { formatDate } from "@angular/common";
+import * as moment from 'moment';
 
 @Component({
   selector: "app-stats",
@@ -11,10 +11,10 @@ import { formatDate } from "@angular/common";
   styleUrls: ["./stats.component.scss"],
 })
 export class StatsComponent implements OnInit {
-  viewMode: string = "cards"; // Default to card view
-  filteredStudents: any[] = []; // Filtered students for table view
-  filteredCardStudents: any[] = []; // Filtered students for card view
-  searchTerm: string = ""; // Search term for filtering
+  viewMode: string = "cards";
+  filteredStudents: any[] = [];
+  filteredCardStudents: any[] = [];
+  searchTerm: string = "";
   displayedColumns: string[] = [
     "name",
     "day",
@@ -22,24 +22,20 @@ export class StatsComponent implements OnInit {
     "studied",
     "added",
     "level",
-  ]; // Table columns
-  selectedWeek: Date = new Date(); // Selected week from date picker
-  daysOfWeek: Date[] = []; // Days in the selected week
-  userReports$: Observable<any>; // Reports from the store
-  groupedReports: any = {}; // Grouped reports by username
-  isLoading: boolean = false; // Loading indicator
-  error: string | null = null; // Error message
+  ];
+  selectedWeek: Date = new Date();
+  daysOfWeek: Date[] = [];
+  userReports$: Observable<any>;
+  groupedReports: any = {};
+  isLoading: boolean = false;
+  error: string | null = null;
 
   constructor(private store: Store) {}
 
   ngOnInit(): void {
-    // Initialize userReports observable
     this.userReports$ = this.store.select(selectGlobalReports);
-
-    // Fetch reports for the current week
     this.fetchReports();
 
-    // Subscribe to userReports$ and process the data
     this.userReports$.subscribe({
       next: (reports) => {
         console.log("reports", reports);
@@ -55,18 +51,16 @@ export class StatsComponent implements OnInit {
       },
     });
 
-    // Calculate days of the current week
     this.calculateDaysOfWeek();
   }
 
-  // Fetch reports based on the selected week
+  // Updated to use Wednesday-Tuesday week system
   fetchReports(): void {
-    const startOfWeek = this.getStartOfWeek(this.selectedWeek);
-    const endOfWeek = this.getEndOfWeek(this.selectedWeek);
-    const formattedStartDate = formatDate(startOfWeek, "yyyy-MM-dd", "en");
-    const formattedEndDate = formatDate(endOfWeek, "yyyy-MM-dd", "en");
+    const range = this.getCustomWeekRange(this.selectedWeek);
+    const formattedStartDate = moment(range.start).format('YYYY-MM-DD');
+    const formattedEndDate = moment(range.end).format('YYYY-MM-DD');
 
-    this.isLoading = true; // Set loading state
+    this.isLoading = true;
     this.store.dispatch(
       ReportsActions.loadGlobalReports({
         startDate: formattedStartDate,
@@ -75,24 +69,25 @@ export class StatsComponent implements OnInit {
     );
   }
 
-  // Calculate the start and end of the week for the selected date
+  // Updated to use Wednesday-Tuesday week system
   calculateDaysOfWeek(): void {
-    const startOfWeek = this.getStartOfWeek(this.selectedWeek);
-    this.daysOfWeek = Array.from(
-      { length: 7 },
-      (_, i) => new Date(startOfWeek.getTime() + i * 24 * 60 * 60 * 1000)
-    );
+    const range = this.getCustomWeekRange(this.selectedWeek);
+    this.daysOfWeek = [];
+    for (let i = 0; i < 7; i++) {
+      this.daysOfWeek.push(moment(range.start).add(i, 'days').toDate());
+    }
   }
 
-  getStartOfWeek(date: Date): Date {
-    const day = date.getDay();
-    const diff = date.getDate() - day;
-    return new Date(date.setDate(diff));
-  }
-
-  getEndOfWeek(date: Date): Date {
-    const startOfWeek = this.getStartOfWeek(date);
-    return new Date(startOfWeek.getTime() + 6 * 24 * 60 * 60 * 1000);
+  // Custom week range method (Wednesday to Tuesday)
+  getCustomWeekRange(date: Date): { start: Date, end: Date } {
+    const momentDate = moment(date);
+    const dayOfWeek = momentDate.day();
+    const daysFromWednesday = (dayOfWeek + 4) % 7;
+    
+    const wednesday = momentDate.clone().subtract(daysFromWednesday, 'days');
+    const tuesday = wednesday.clone().add(6, 'days');
+    
+    return { start: wednesday.toDate(), end: tuesday.toDate() };
   }
 
   getDayFromDate(dateString: string): string {
@@ -109,7 +104,6 @@ export class StatsComponent implements OnInit {
     return daysOfWeek[date.getDay()];
   }
 
-  // Group reports by username
   groupReportsByUser(reports: any[]): void {
     this.groupedReports = reports.reduce((acc, report) => {
       const username = report.attributes?.legacy_username || "Unknown User";
@@ -121,14 +115,12 @@ export class StatsComponent implements OnInit {
     }, {});
   }
 
-  // Update filtered data based on the view mode
   updateFilteredData(): void {
     this.filteredStudents = this.prepareTableData();
     this.filteredCardStudents = this.prepareCardData();
     console.log("this.filteredCardStudents", this.filteredCardStudents);
   }
 
-  // Prepare table data dynamically
   prepareTableData(): any[] {
     const allRows = [];
     Object.keys(this.groupedReports).forEach((username) => {
@@ -146,7 +138,6 @@ export class StatsComponent implements OnInit {
     return allRows;
   }
 
-  // Prepare card data dynamically
   prepareCardData(): any[] {
     return Object.keys(this.groupedReports).map((username) => {
       const totalStudied = this.groupedReports[username].reduce(
@@ -160,8 +151,8 @@ export class StatsComponent implements OnInit {
 
       const daysWithAdditionalFields = this.groupedReports[username].map(
         (day: any) => {
-          const dayOfWeek = this.getDayFromDate(day.day_reported); // Calculate day
-          const addedOnDay = this.getDayFromDate(day.creation); // Calculate addedOn
+          const dayOfWeek = this.getDayFromDate(day.day_reported);
+          const addedOnDay = this.getDayFromDate(day.creation);
           return {
             ...day,
             day: dayOfWeek,
@@ -179,7 +170,6 @@ export class StatsComponent implements OnInit {
     });
   }
 
-  // Filter students based on search term
   filterStudents(): void {
     if (this.searchTerm.trim() === "") {
       this.updateFilteredData();
@@ -193,14 +183,13 @@ export class StatsComponent implements OnInit {
     }
   }
 
-  // Switch between table and card views
   switchView(view: string): void {
     this.viewMode = view;
   }
 
-  // Handle week change
-  onWeekChange(event: Date): void {
-    this.selectedWeek = event;
+  // Updated to handle week selector output
+  onWeekChange(weekRange: {start: Date, end: Date}): void {
+    this.selectedWeek = weekRange.start;
     this.calculateDaysOfWeek();
     this.fetchReports();
   }

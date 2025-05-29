@@ -38,6 +38,8 @@ import { MatTableModule } from "@angular/material/table";
 import { MatButtonToggleModule } from "@angular/material/button-toggle";
 import { MatExpansionModule } from "@angular/material/expansion";
 
+import { ComponentsModule } from "app/components/components.module";
+
 @NgModule({
   imports: [
     CommonModule,
@@ -60,6 +62,7 @@ import { MatExpansionModule } from "@angular/material/expansion";
     MatTableModule,
     MatButtonToggleModule,
     MatExpansionModule,
+    ComponentsModule
   ],
   declarations: [
     DashboardComponent,

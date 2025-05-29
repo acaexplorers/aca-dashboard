@@ -1,5 +1,65 @@
+// Use your existing styles from stats component
+.container {
+  margin: 20px;
+  height: 80vh;
+}
+
+.card-view,
+.table-view {
+  margin-top: 20px;
+  width: 100%;
+}
+
+/* Card View Styles */
+.card-view {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.student-card {
+  width: 100%;
+  max-width: 600px;
+  margin-bottom: 20px;
+}
+
+.mat-expansion-panel {
+  width: 100%;
+}
+
+.mat-panel-title {
+  font-weight: bold;
+}
+
+.mat-panel-description {
+  color: gray;
+}
+
+.student-stats {
+  padding: 16px 0;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  padding: 4px 0;
+}
+
+.card-actions {
+  margin-top: 16px;
+  text-align: center;
+}
+
+/* Table View Styles */
+.table-view {
+  width: 100%;
+}
+
 .mat-header-row {
-  background-color: #3f51b5; /* Dark blue color */
+  background-color: #3f51b5;
   color: white;
 }
 
@@ -14,21 +74,106 @@
   color: white;
 }
 
+.mat-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* Status styling */
+.status-active {
+  color: #4caf50;
+  font-weight: bold;
+}
+
+.status-inactive {
+  color: #f44336;
+  font-weight: bold;
+}
+
+/* Button styles */
 .generate-button {
-  background-color: #2196f3; /* Blue color */
+  background-color: #2196f3;
   color: white;
   border-radius: 4px;
   padding: 5px 10px;
 }
 
 .generate-button:hover {
-  background-color: #1976d2; /* Darker blue on hover */
+  background-color: #1976d2;
 }
 
-.search-bar {
+/* Loading and error states */
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px;
+  
+  mat-spinner {
+    ::ng-deep circle {
+      stroke: #f44336;
+    }
+  }
+}
+
+.error-message {
+  color: #f44336;
+  text-align: center;
+  padding: 20px;
+  background: #ffebee;
+  border-radius: 8px;
+  margin: 20px 0;
+  border-left: 4px solid #f44336;
+  font-weight: 500;
+}
+
+/* Week selector and search */
+.date-input {
   margin-bottom: 20px;
 }
 
-.points-container {
-    padding: 15px;
+/* View toggle buttons */
+.mat-flat-button {
+  background-color: #f44336;
+  color: white;
+}
+
+/* Form field styling */
+::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline {
+  background-color: white;
+  border-radius: 5px;
+}
+
+::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline-thick {
+  color: #f44336;
+}
+
+::ng-deep .mat-form-field-appearance-outline.mat-focused .mat-form-field-label {
+  color: #f44336;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .container {
+    margin: 10px;
+  }
+
+  .mat-cell,
+  .mat-header-cell {
+    padding: 4px;
+    font-size: 0.9rem;
+  }
+
+  .student-stats {
+    padding: 8px 0;
+  }
+
+  .stat-row {
+    flex-direction: column;
+    margin-bottom: 12px;
+    
+    strong {
+      margin-bottom: 4px;
+    }
+  }
 }

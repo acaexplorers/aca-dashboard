@@ -7,18 +7,14 @@
     {{ error }}
   </div>
 
-  <!-- Date Picker -->
-  <mat-form-field class="date-input">
-    <mat-label>Select Week Starting Day</mat-label>
-    <input
-      matInput
-      [matDatepicker]="picker"
-      (dateChange)="onWeekChange($event.value)"
-    />
-    <mat-hint>MM/DD/YYYY</mat-hint>
-    <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-    <mat-datepicker #picker></mat-datepicker>
-  </mat-form-field>
+  <!-- Week Selector (replaces mat-datepicker) -->
+  <div class="date-input" *ngIf="!isLoading && !error">
+    <app-week-selector
+      [selectedWeek]="selectedWeek"
+      (weekChange)="onWeekChange($event)"
+    >
+    </app-week-selector>
+  </div>
 
   <!-- Search Input -->
   <mat-form-field appearance="outline" *ngIf="!isLoading && !error">

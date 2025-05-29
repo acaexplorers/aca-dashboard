@@ -59,7 +59,6 @@ export class ReportsEffects {
             if (response.status >= 200 && response.status < 300) {
               return ReportsActions.submitUserReportSuccess({ report:response.body.data });
             } else {
-              alert("I'm groing to throw an error");
               throw new Error(`Server returned ${response.status}`);
             }
           }),

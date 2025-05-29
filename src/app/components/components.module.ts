@@ -4,10 +4,11 @@ import { RouterModule } from '@angular/router';
 
 // imports
 import { MatIconModule } from '@angular/material/icon';
-
+// Custom components
 import { FooterComponent } from './footer/footer.component';
 import { NavbarComponent } from './navbar/navbar.component';
 import { SidebarComponent } from './sidebar/sidebar.component';
+import { WeekSelectorComponent } from './weekSelector/week-selector.component';
 
 //Custom components
 import { DialogComponent } from './dialog/dialog.component';
@@ -23,12 +24,14 @@ import { DialogComponent } from './dialog/dialog.component';
     FooterComponent,
     NavbarComponent,
     SidebarComponent,
-    DialogComponent
+    DialogComponent,
+    WeekSelectorComponent
   ],
   exports: [
     FooterComponent,
     NavbarComponent,
-    SidebarComponent
+    SidebarComponent,
+    WeekSelectorComponent
   ]
 })
 export class ComponentsModule { }

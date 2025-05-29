@@ -1,0 +1,131 @@
+/* New header styles for collapse/expand */
+.week-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 8px;
+}
+
+.week-header:hover {
+  background: #f8f9fa;
+  border-color: #f44336;
+}
+
+.week-text {
+  font-weight: 500;
+  color: #333;
+  font-size: 1.1em;
+}
+
+.toggle-icon {
+  color: #f44336;
+  font-size: 12px;
+  transition: transform 0.3s ease;
+}
+
+.toggle-icon.expanded {
+  transform: rotate(180deg);
+}
+
+/* Existing calendar styles */
+.calendar-container {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: white;
+  padding: 16px;
+  max-width: 350px;
+  margin: 0 auto;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.nav-btn {
+  background: #f44336;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.nav-btn:hover {
+  background: #d32f2f;
+}
+
+.month-year {
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.day-header {
+  text-align: center;
+  font-weight: bold;
+  padding: 8px 4px;
+  background: #f5f5f5;
+  font-size: 0.9em;
+}
+
+.day-cell {
+  text-align: center;
+  padding: 8px 4px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.day-cell:hover {
+  background: #e3f2fd;
+}
+
+.day-cell.other-month {
+  color: #ccc;
+}
+
+.day-cell.selected-week {
+  background: #bbdefb;
+  border-color: #2196f3;
+}
+
+.day-cell.week-start {
+  border-left: 3px solid #f44336;
+}
+
+.day-cell.week-end {
+  border-right: 3px solid #f44336;
+}
+
+.selected-week-display {
+  margin-top: 16px;
+  text-align: center;
+  font-weight: bold;
+  color: #f44336;
+}

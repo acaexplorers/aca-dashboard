@@ -7,7 +7,6 @@ import { filter, Observable, take } from "rxjs";
 import {
   selectWeeklyReports,
   selectIsSubmitLoading,
-  selectSubmitError,
   selectSubmitReportStatus,
 } from "app/store/reports/selectors/reports.selectors";
 import { selectAuthUsername } from "app/store/auth/selectors/auth.selectors";
@@ -20,30 +19,29 @@ import { DialogComponent } from "app/components/dialog/dialog.component";
   styleUrls: ["./register-activity.component.scss"],
 })
 export class RegisterActivityComponent implements OnInit {
+
   daysReference = {
     english: [
-      "Monday",
-      "Tuesday",
       "Wednesday",
-      "Thursday",
+      "Thursday", 
       "Friday",
       "Saturday",
       "Sunday",
+      "Monday",
+      "Tuesday",
     ],
     spanish: [
-      "Lunes",
-      "Martes",
       "Miércoles",
       "Jueves",
-      "Viernes",
+      "Viernes", 
       "Sábado",
       "Domingo",
+      "Lunes",
+      "Martes",
     ],
   };
 
-  selectedIndex =
-    Number(localStorage.getItem("selectedIndex")) ??
-    (new Date().getDay() + 6) % 7;
+  selectedIndex = Number(localStorage.getItem("selectedIndex")) ?? this.getCurrentDayIndex();
   daysCheckMarks: string[] = [];
   added = new FormControl<number | null>(null);
   studied = new FormControl<number | null>(null);
@@ -86,25 +84,164 @@ export class RegisterActivityComponent implements OnInit {
     });
   }
 
-  getFormattedDate(date: Date): string {
-    return date.toLocaleDateString("en-CA"); // YYYY-MM-DD format
+  getCurrentDayIndex(): number {
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    
+    // Convert to our system where Wednesday=0, Tuesday=6
+    const ourWeekIndex = (dayOfWeek + 4) % 7;
+    return ourWeekIndex;
+  }
+
+  getDay(selectedDayIndex: number): Date {
+    const today = new Date();
+    const todayIndex = this.getCurrentDayIndex();
+    const dayDifference = selectedDayIndex - todayIndex;
+    
+    const targetDate = new Date(today);
+    targetDate.setDate(today.getDate() + dayDifference);
+    return targetDate;
   }
 
   getWeekReports(username: string): void {
-    const date = new Date();
-    const endDate = this.getFormattedDate(date);
-    date.setDate(date.getDate() - 6);
-    const startDate = this.getFormattedDate(date);
+    const today = new Date();
+    const todayIndex = this.getCurrentDayIndex();
+    
+    const wednesday = new Date(today);
+    wednesday.setDate(today.getDate() - todayIndex);
+    
+    const tuesday = new Date(wednesday);
+    tuesday.setDate(wednesday.getDate() + 6);
+    
+    const startDate = this.getFormattedDate(wednesday);
+    const endDate = this.getFormattedDate(tuesday);
 
     this.store.dispatch(
       ReportsActions.loadWeeklyReports({ startDate, endDate, username })
     );
   }
 
-  getDay(selectedDayIndex: number): Date {
-    const today = new Date();
-    const dayDifference = selectedDayIndex - 6;
-    return new Date(today.setDate(today.getDate() + dayDifference));
+  isFutureDay(dayIndex: number): boolean {
+    const currentDayIndex = this.getCurrentDayIndex();
+    return dayIndex > currentDayIndex;
+  }
+
+  isToday(dayIndex: number): boolean {
+    const currentDayIndex = this.getCurrentDayIndex();
+    return dayIndex === currentDayIndex;
+  }
+
+  getDayStatus(dayIndex: number): 'future' | 'selected' | 'complete' | 'partial' | 'not-done' {
+    // Check if day is in the future - highest priority
+    if (this.isFutureDay(dayIndex)) {
+      return 'future';
+    }
+    
+    // Check if day is currently selected
+    if (this.selectedIndex === dayIndex) {
+      return 'selected';
+    }
+  
+    // Check report status for past/current days
+    const dayDate = this.getFormattedDate(this.getDay(dayIndex));
+    const report = this.userReports.find(r => r.day_reported === dayDate);
+    
+    if (!report) {
+      return 'not-done';
+    }
+  
+    // Check if both fields have values (complete)
+    const hasAdded = report.added !== null && report.added > 0;
+    const hasStudied = report.studied !== null && report.studied > 0;
+  
+    if (hasAdded && hasStudied) {
+      return 'complete';  // Both fields filled
+    }
+    
+    if (hasAdded || hasStudied) {
+      return 'partial';   // Only one field filled
+    }
+    
+    return 'not-done';    // No fields filled
+  }
+
+  getDayClass(dayIndex: number): string {
+    const status = this.getDayStatus(dayIndex);
+    return `day-${status}`;
+  }
+
+  getDayColor(dayIndex: number): string {
+    const status = this.getDayStatus(dayIndex);
+    
+    switch (status) {
+      case 'future':
+        return '#e0e0e0';      // Gray
+      case 'selected':
+        return '#000000';      // Black
+      case 'complete':
+        return '#4caf50';      // Green
+      case 'partial':
+        return '#ff9800';      // Yellow/Orange
+      case 'not-done':
+        return '#f44336';      // Red
+      default:
+        return '#e0e0e0';
+    }
+  }
+
+  isDayDisabled(dayIndex: number): boolean {
+    return this.isFutureDay(dayIndex);
+  }
+
+  selectDay(dayIndex: number): void {
+    if (this.isFutureDay(dayIndex)) {
+      return;
+    }
+    
+    this.selectedIndex = dayIndex;
+    this.updateSelectedDay();
+  }
+
+  getDayTextColor(dayIndex: number): string {
+    const status = this.getDayStatus(dayIndex);
+    
+    switch (status) {
+      case 'future':
+        return '#9e9e9e';      // Light gray text
+      case 'selected':
+        return '#ffffff';      // White text
+      case 'complete':
+        return '#ffffff';      // White text
+      case 'partial':
+        return '#ffffff';      // White text
+      case 'not-done':
+        return '#ffffff';      // White text
+      default:
+        return '#000000';
+    }
+  }
+
+  getDayStatusText(dayIndex: number): string {
+    const status = this.getDayStatus(dayIndex);
+    
+    switch (status) {
+      case 'future':
+        return 'Future day - not available';
+      case 'selected':
+        return 'Currently selected';
+      case 'complete':
+        return 'Report completed';
+      case 'partial':
+        return 'Report partially completed';
+      case 'not-done':
+        return 'No report submitted';
+      default:
+        return '';
+    }
+  }
+  
+  getFormattedDate(date: Date): string {
+    return date.toLocaleDateString("en-CA"); // YYYY-MM-DD format
   }
 
   updateDaysCheckMarks(): void {
@@ -136,7 +273,7 @@ export class RegisterActivityComponent implements OnInit {
       });
       return;
     }
-
+  
     const currentDate = this.getFormattedDate(this.getDay(this.selectedIndex));
     const dataToSend = {
       studied: Number(this.studied.value),
@@ -145,11 +282,11 @@ export class RegisterActivityComponent implements OnInit {
       creation: this.getFormattedDate(new Date()),
       day_reported: currentDate,
     };
-
+  
     this.store.dispatch(
       ReportsActions.submitUserReport({ report: dataToSend })
     );
-
+  
     // Single subscription for both success/error
     this.store
       .select(selectSubmitReportStatus)
@@ -165,6 +302,16 @@ export class RegisterActivityComponent implements OnInit {
           "OK",
           { duration: status.error ? 3000 : 2000 }
         );
+        
+        // If successful, immediately update local state for color change
+        if (!status.error) {
+          this.updateMemoryReports(
+            currentDate,
+            Number(this.added.value),
+            Number(this.studied.value)
+          );
+        }
+        
         this.openDialog(status.error ? true : false);
       });
   }

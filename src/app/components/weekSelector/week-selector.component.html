@@ -1,0 +1,46 @@
+<!-- Collapsed Header - Always visible -->
+<div class="week-header" (click)="toggleCalendar()">
+  <span class="week-text">{{ getSelectedWeekText() }}</span>
+  <span class="toggle-icon" [class.expanded]="isExpanded">
+    {{ isExpanded ? "▲" : "▼" }}
+  </span>
+</div>
+
+<!-- Calendar Container - Shows/hides based on isExpanded -->
+<div class="calendar-container" *ngIf="isExpanded">
+  <!-- Month/Year Header -->
+  <div class="calendar-header">
+    <button (click)="previousMonth()" class="nav-btn">&lt;</button>
+    <span class="month-year">{{ currentMonth.format("MMMM YYYY") }}</span>
+    <button (click)="nextMonth()" class="nav-btn">&gt;</button>
+  </div>
+
+  <!-- Days of Week Header -->
+  <div class="calendar-grid">
+    <div class="day-header">W</div>
+    <div class="day-header">T</div>
+    <div class="day-header">F</div>
+    <div class="day-header">S</div>
+    <div class="day-header">S</div>
+    <div class="day-header">M</div>
+    <div class="day-header">T</div>
+
+    <!-- Calendar Days -->
+    <div
+      *ngFor="let day of calendarDays"
+      class="day-cell"
+      [class.other-month]="!day.isCurrentMonth"
+      [class.selected-week]="day.isInSelectedWeek"
+      [class.week-start]="day.isWeekStart"
+      [class.week-end]="day.isWeekEnd"
+      (click)="selectWeek(day.date)"
+    >
+      {{ day.date.date() }}
+    </div>
+  </div>
+
+  <!-- Selected Week Display -->
+  <div class="selected-week-display">
+    Selected Week: {{ getSelectedWeekText() }}
+  </div>
+</div>

@@ -6,14 +6,11 @@
       <div
         *ngFor="let day of daysReference.spanish; let i = index"
         class="day"
-        [style.background]="
-          selectedIndex === i
-            ? '#1886c8'
-            : daysCheckMarks.includes(getFormattedDate(getDay(i)))
-            ? '#6bbb2c'
-            : '#ff2c01'
-        "
-        (click)="selectedIndex = i; updateSelectedDay()"
+        [class.day-disabled]="isFutureDay(i)"
+        [style.background-color]="getDayColor(i)"
+        [style.color]="getDayTextColor(i)"
+        [attr.title]="getDayStatusText(i)"
+        (click)="selectDay(i)"
       >
         {{ day[0] }}
         <div class="divider"></div>

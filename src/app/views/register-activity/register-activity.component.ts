@@ -177,7 +177,7 @@ export class RegisterActivityComponent implements OnInit {
       case 'future':
         return '#e0e0e0';      // Gray
       case 'selected':
-        return '#000000';      // Black
+        return 'revert-layer';      // Black
       case 'complete':
         return '#4caf50';      // Green
       case 'partial':

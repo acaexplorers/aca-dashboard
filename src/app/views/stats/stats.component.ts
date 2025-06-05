@@ -1,6 +1,7 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, OnDestroy } from "@angular/core";
 import { Store } from "@ngrx/store";
-import { Observable } from "rxjs";
+import { Observable, Subject, combineLatest, of } from "rxjs";
+import { map, startWith, takeUntil, catchError } from "rxjs/operators";
 import { selectGlobalReports } from "app/store/reports/selectors/reports.selectors";
 import * as ReportsActions from "app/store/reports/actions/reports.actions";
 import * as moment from 'moment';
@@ -10,10 +11,8 @@ import * as moment from 'moment';
   templateUrl: "./stats.component.html",
   styleUrls: ["./stats.component.scss"],
 })
-export class StatsComponent implements OnInit {
+export class StatsComponent implements OnInit, OnDestroy {
   viewMode: string = "cards";
-  filteredStudents: any[] = [];
-  filteredCardStudents: any[] = [];
   searchTerm: string = "";
   displayedColumns: string[] = [
     "name",
@@ -25,33 +24,67 @@ export class StatsComponent implements OnInit {
   ];
   selectedWeek: Date = new Date();
   daysOfWeek: Date[] = [];
-  userReports$: Observable<any>;
-  groupedReports: any = {};
-  isLoading: boolean = false;
-  error: string | null = null;
+
+  // Subject for cleanup
+  private destroy$ = new Subject<void>();
+  
+  // Subject for search term
+  private searchTermSubject = new Subject<string>();
+
+  // Store observables
+  userReports$ = this.store.select(selectGlobalReports);
+  
+  // Loading and error observables
+  isLoading$ = this.userReports$.pipe(
+    map(() => false),
+    startWith(true),
+    catchError(() => of(false))
+  );
+  
+  error$ = this.userReports$.pipe(
+    map(() => null),
+    catchError(err => of("Failed to fetch reports. Please try again."))
+  );
+
+  // Filtered data observables
+  filteredStudents$ = combineLatest([
+    this.userReports$,
+    this.searchTermSubject.pipe(startWith(''))
+  ]).pipe(
+    map(([reports, searchTerm]) => {
+      if (!reports?.data) return [];
+      const tableData = this.prepareTableData(reports.data);
+      return searchTerm.trim() ? 
+        tableData.filter(s => s.name.toLowerCase().includes(searchTerm.toLowerCase())) :
+        tableData;
+    }),
+    takeUntil(this.destroy$)
+  );
+  
+  filteredCardStudents$ = combineLatest([
+    this.userReports$,
+    this.searchTermSubject.pipe(startWith(''))
+  ]).pipe(
+    map(([reports, searchTerm]) => {
+      if (!reports?.data) return [];
+      const cardData = this.prepareCardData(reports.data);
+      return searchTerm.trim() ? 
+        cardData.filter(s => s.name.toLowerCase().includes(searchTerm.toLowerCase())) :
+        cardData;
+    }),
+    takeUntil(this.destroy$)
+  );
 
   constructor(private store: Store) {}
 
   ngOnInit(): void {
-    this.userReports$ = this.store.select(selectGlobalReports);
     this.fetchReports();
-
-    this.userReports$.subscribe({
-      next: (reports) => {
-        console.log("reports", reports);
-        this.isLoading = false;
-        this.error = null;
-        this.groupReportsByUser(reports.data);
-        this.updateFilteredData();
-      },
-      error: (err) => {
-        this.isLoading = false;
-        this.error = "Failed to fetch reports. Please try again.";
-        console.error("Error fetching reports:", err);
-      },
-    });
-
     this.calculateDaysOfWeek();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   // Updated to use Wednesday-Tuesday week system
@@ -60,7 +93,6 @@ export class StatsComponent implements OnInit {
     const formattedStartDate = moment(range.start).format('YYYY-MM-DD');
     const formattedEndDate = moment(range.end).format('YYYY-MM-DD');
 
-    this.isLoading = true;
     this.store.dispatch(
       ReportsActions.loadGlobalReports({
         startDate: formattedStartDate,
@@ -104,8 +136,8 @@ export class StatsComponent implements OnInit {
     return daysOfWeek[date.getDay()];
   }
 
-  groupReportsByUser(reports: any[]): void {
-    this.groupedReports = reports.reduce((acc, report) => {
+  groupReportsByUser(reports: any[]): any {
+    return reports.reduce((acc, report) => {
       const username = report.attributes?.legacy_username || "Unknown User";
       if (!acc[username]) {
         acc[username] = [];
@@ -115,16 +147,11 @@ export class StatsComponent implements OnInit {
     }, {});
   }
 
-  updateFilteredData(): void {
-    this.filteredStudents = this.prepareTableData();
-    this.filteredCardStudents = this.prepareCardData();
-    console.log("this.filteredCardStudents", this.filteredCardStudents);
-  }
-
-  prepareTableData(): any[] {
+  prepareTableData(reports: any[]): any[] {
+    const groupedReports = this.groupReportsByUser(reports);
     const allRows = [];
-    Object.keys(this.groupedReports).forEach((username) => {
-      this.groupedReports[username].forEach((day: any) => {
+    Object.keys(groupedReports).forEach((username) => {
+      groupedReports[username].forEach((day: any) => {
         allRows.push({
           name: username,
           day: day.day_reported,
@@ -138,18 +165,19 @@ export class StatsComponent implements OnInit {
     return allRows;
   }
 
-  prepareCardData(): any[] {
-    return Object.keys(this.groupedReports).map((username) => {
-      const totalStudied = this.groupedReports[username].reduce(
+  prepareCardData(reports: any[]): any[] {
+    const groupedReports = this.groupReportsByUser(reports);
+    return Object.keys(groupedReports).map((username) => {
+      const totalStudied = groupedReports[username].reduce(
         (acc: number, day: any) => acc + day.studied,
         0
       );
-      const totalAdded = this.groupedReports[username].reduce(
+      const totalAdded = groupedReports[username].reduce(
         (acc: number, day: any) => acc + day.added,
         0
       );
 
-      const daysWithAdditionalFields = this.groupedReports[username].map(
+      const daysWithAdditionalFields = groupedReports[username].map(
         (day: any) => {
           const dayOfWeek = this.getDayFromDate(day.day_reported);
           const addedOnDay = this.getDayFromDate(day.creation);
@@ -171,16 +199,7 @@ export class StatsComponent implements OnInit {
   }
 
   filterStudents(): void {
-    if (this.searchTerm.trim() === "") {
-      this.updateFilteredData();
-    } else {
-      this.filteredStudents = this.prepareTableData().filter((student) =>
-        student.name.toLowerCase().includes(this.searchTerm.toLowerCase())
-      );
-      this.filteredCardStudents = this.prepareCardData().filter((student) =>
-        student.name.toLowerCase().includes(this.searchTerm.toLowerCase())
-      );
-    }
+    this.searchTermSubject.next(this.searchTerm);
   }
 
   switchView(view: string): void {

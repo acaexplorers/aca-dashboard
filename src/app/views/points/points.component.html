@@ -59,7 +59,7 @@
 
   <!-- Table View -->
   <div *ngIf="viewMode === 'table' && !(isLoading$ | async) && !(error$ | async)" class="table-view">
-    <table mat-table [dataSource]="filteredStudents" class="mat-elevation-z8">
+    <table mat-table [dataSource]="filteredStudents$ | async" class="mat-elevation-z8">
       <!-- Username Column -->
       <ng-container matColumnDef="username">
         <th mat-header-cell *matHeaderCellDef>Student</th>
@@ -130,7 +130,7 @@
         </td>
       </ng-container>
 
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns; trackBy: trackByUsername"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
     </table>
   </div>
@@ -138,7 +138,7 @@
   <!-- Card View -->
   <div *ngIf="viewMode === 'cards' && !(isLoading$ | async) && !(error$ | async)" class="card-view">
     <mat-accordion>
-      <mat-expansion-panel *ngFor="let student of filteredCardStudents" class="student-card">
+      <mat-expansion-panel *ngFor="let student of filteredCardStudents$ | async; trackBy: trackByUsername">
         <mat-expansion-panel-header>
           <mat-panel-title>{{ student.name }}</mat-panel-title>
           <mat-panel-description>

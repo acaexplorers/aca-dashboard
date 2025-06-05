@@ -1,14 +1,14 @@
 <div class="container">
   <!-- Error and Loading Indicators -->
-  <div *ngIf="isLoading" class="loading-spinner">
+  <div *ngIf="isLoading$ | async" class="loading-spinner">
     <mat-spinner></mat-spinner>
   </div>
-  <div *ngIf="error" class="error-message">
+  <div *ngIf="error$ | async as error" class="error-message">
     {{ error }}
   </div>
 
-  <!-- Week Selector (replaces mat-datepicker) -->
-  <div class="date-input" *ngIf="!isLoading && !error">
+  <!-- Week Selector -->
+  <div class="date-input" *ngIf="!(isLoading$ | async) && !(error$ | async)">
     <app-week-selector
       [selectedWeek]="selectedWeek"
       (weekChange)="onWeekChange($event)"
@@ -17,7 +17,7 @@
   </div>
 
   <!-- Search Input -->
-  <mat-form-field appearance="outline" *ngIf="!isLoading && !error">
+  <mat-form-field appearance="outline" *ngIf="!(isLoading$ | async) && !(error$ | async)">
     <mat-label>Search for names..</mat-label>
     <input
       matInput
@@ -28,7 +28,7 @@
   </mat-form-field>
 
   <!-- Switch View Buttons -->
-  <div *ngIf="!isLoading && !error">
+  <div *ngIf="!(isLoading$ | async) && !(error$ | async)">
     <button
       mat-flat-button
       (click)="switchView('table')"
@@ -47,8 +47,8 @@
   </div>
 
   <!-- Table View -->
-  <div *ngIf="viewMode === 'table' && !isLoading && !error" class="table-view">
-    <table mat-table [dataSource]="filteredStudents" class="mat-elevation-z8">
+  <div *ngIf="viewMode === 'table' && !(isLoading$ | async) && !(error$ | async)" class="table-view">
+    <table mat-table [dataSource]="filteredStudents$ | async" class="mat-elevation-z8">
       <!-- Name Column -->
       <ng-container matColumnDef="name">
         <th mat-header-cell *matHeaderCellDef>Name</th>
@@ -93,9 +93,9 @@
   </div>
 
   <!-- Card View -->
-  <div *ngIf="viewMode === 'cards' && !isLoading && !error" class="card-view">
+  <div *ngIf="viewMode === 'cards' && !(isLoading$ | async) && !(error$ | async)" class="card-view">
     <mat-accordion>
-      <mat-expansion-panel *ngFor="let student of filteredCardStudents">
+      <mat-expansion-panel *ngFor="let student of filteredCardStudents$ | async">
         <mat-expansion-panel-header>
           <mat-panel-title>{{ student.name }}</mat-panel-title>
           <mat-panel-description>

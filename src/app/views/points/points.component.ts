@@ -1,6 +1,7 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, OnDestroy } from "@angular/core";
 import { Store } from "@ngrx/store";
-import { Observable } from "rxjs";
+import { Observable, Subject, combineLatest, BehaviorSubject } from "rxjs";
+import { takeUntil, map, startWith, distinctUntilChanged, debounceTime } from "rxjs/operators";
 import { MatDialog } from "@angular/material/dialog";
 import * as PointsActions from "app/store/points/actions/points.actions";
 import {
@@ -15,12 +16,13 @@ import { CombinedStudentData } from "app/types/points.types";
   templateUrl: "./points.component.html",
   styleUrls: ["./points.component.scss"],
 })
-export class PointsComponent implements OnInit {
+export class PointsComponent implements OnInit, OnDestroy {
+  // Component state
   viewMode: string = "table";
-  filteredStudents: CombinedStudentData[] = [];
-  filteredCardStudents: any[] = [];
   searchTerm: string = "";
+  selectedWeek: Date = new Date();
 
+  // Table configuration
   displayedColumns: string[] = [
     "username",
     "studyRate",
@@ -34,28 +36,68 @@ export class PointsComponent implements OnInit {
     "action",
   ];
 
-  selectedWeek: Date = new Date();
-
   // Store observables
   allStudentsData$: Observable<CombinedStudentData[]>;
   isLoading$: Observable<boolean>;
   error$: Observable<string | null>;
 
+  // Derived observables for filtered data
+  filteredStudents$: Observable<CombinedStudentData[]>;
+  filteredCardStudents$: Observable<any[]>;
+
+  // Use BehaviorSubject for better state management
+  private searchTermSubject = new BehaviorSubject<string>("");
+
+  // Subject for component cleanup
+  private destroy$ = new Subject<void>();
+
   constructor(private store: Store, private dialog: MatDialog) {
-    // Initialize observables
+    // Initialize store observables
     this.allStudentsData$ = this.store.select(selectStudentsWithPoints);
     this.isLoading$ = this.store.select(selectPointsLoading);
     this.error$ = this.store.select(selectPointsError);
+
+    // Create filtered data observables
+    this.setupFilteredData();
   }
 
   ngOnInit(): void {
     this.loadPointsData();
+  }
 
-    // Subscribe to data changes
-    this.allStudentsData$.subscribe((students) => {
-      this.filteredStudents = [...students];
-      this.filteredCardStudents = this.prepareCardData(students);
-    });
+  ngOnDestroy(): void {
+    // Clean up subscriptions
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.searchTermSubject.complete();
+  }
+
+  private setupFilteredData(): void {
+    // Combine students data with search term with proper debouncing
+    this.filteredStudents$ = combineLatest([
+      this.allStudentsData$,
+      this.searchTermSubject.pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        startWith("")
+      ),
+    ]).pipe(
+      map(([students, searchTerm]) => {
+        if (!searchTerm.trim()) {
+          return students || [];
+        }
+        return (students || []).filter((student) =>
+          student.username.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      }),
+      takeUntil(this.destroy$)
+    );
+
+    // Create card data from filtered students
+    this.filteredCardStudents$ = this.filteredStudents$.pipe(
+      map((students) => this.prepareCardData(students)),
+      takeUntil(this.destroy$)
+    );
   }
 
   loadPointsData(): void {
@@ -84,17 +126,8 @@ export class PointsComponent implements OnInit {
   }
 
   filterStudents(): void {
-    this.allStudentsData$.subscribe((allStudents) => {
-      if (this.searchTerm.trim() === "") {
-        this.filteredStudents = [...allStudents];
-        this.filteredCardStudents = this.prepareCardData(allStudents);
-      } else {
-        this.filteredStudents = allStudents.filter((student) =>
-          student.username.toLowerCase().includes(this.searchTerm.toLowerCase())
-        );
-        this.filteredCardStudents = this.prepareCardData(this.filteredStudents);
-      }
-    });
+    // Use the BehaviorSubject to emit the new search term
+    this.searchTermSubject.next(this.searchTerm);
   }
 
   switchView(view: string): void {
@@ -109,15 +142,25 @@ export class PointsComponent implements OnInit {
   /**
    * Show points breakdown for a student
    */
-  calculatePoints(student: CombinedStudentData): void {
-    if (student.pointsBreakdown) {
+  calculatePoints(student: CombinedStudentData | any): void {
+    // Handle both table and card data formats
+    const studentData = student.username
+      ? student
+      : {
+          username: student.name,
+          pointsBreakdown: student.pointsBreakdown,
+        };
+
+    if (studentData.pointsBreakdown) {
       const breakdownText = this.getPointsBreakdownText(
-        student.pointsBreakdown,
-        student.username
+        studentData.pointsBreakdown,
+        studentData.username || studentData.name
       );
       alert(breakdownText);
     } else {
-      alert(`No breakdown available for ${student.username}`);
+      alert(
+        `No breakdown available for ${studentData.username || studentData.name}`
+      );
     }
   }
 
@@ -129,31 +172,35 @@ export class PointsComponent implements OnInit {
     console.log("Points recalculation triggered!");
   }
 
+  trackByUsername(index: number, student: any): string {
+    return student.username || student.name;
+  }
+
   /**
    * Format points breakdown for display
    */
   private getPointsBreakdownText(breakdown: any, studentName: string): string {
     return `
-Points Calculation for ${studentName}:
+      Points Calculation for ${studentName}:
 
-• Multiplier: ${breakdown.multiplier} ${
+      • Multiplier: ${breakdown.multiplier} ${
       breakdown.multiplier === 1.1 ? "(Active Week)" : "(Inactive Week)"
     }
-• Study Rate: ${breakdown.studyRate}
-• Total Added: ${breakdown.totalAdded}
-• Streak Bonus: ${breakdown.streakBonus}
-• Added Streak Bonus: ${breakdown.addedStreakBonus}
-• Active Streak Bonus: ${breakdown.activeStreakBonus}
-• Active Days Streak Bonus: ${breakdown.activeDaysStreakBonus}
+      • Study Rate: ${breakdown.studyRate}
+      • Total Added: ${breakdown.totalAdded}
+      • Streak Bonus: ${breakdown.streakBonus}
+      • Added Streak Bonus: ${breakdown.addedStreakBonus}
+      • Active Streak Bonus: ${breakdown.activeStreakBonus}
+      • Active Days Streak Bonus: ${breakdown.activeDaysStreakBonus}
 
-Formula: (${breakdown.multiplier} × ${breakdown.studyRate}) + ${
+      Formula: (${breakdown.multiplier} × ${breakdown.studyRate}) + ${
       breakdown.totalAdded
     } + ${breakdown.streakBonus} + ${breakdown.addedStreakBonus} + ${
       breakdown.activeStreakBonus
     } + ${breakdown.activeDaysStreakBonus}
 
-Total Points: ${breakdown.totalPoints}
-    `.trim();
+      Total Points: ${breakdown.totalPoints}
+          `.trim();
   }
 
   /**
